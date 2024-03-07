@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
     });
     res.json(result);
   } catch (error) {
-    res.status(400).json({ error: "Username and email should be unique" });
+    res.status(400).json({ error: "Failed to create tweet" });
   }
 });
 
@@ -68,7 +68,7 @@ router.put("/:id", async (req, res) => {
     });
     res.json(result);
   } catch (error) {
-    res.status(400).json({ error: "Cannot update the tweet" });
+    res.status(400).json({ error: "Failed to update the tweet" });
   }
 });
 
