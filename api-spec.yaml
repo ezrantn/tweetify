@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  title: User API
+  description: CRUD operations for managing users in Twitter
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api/v1
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                username:
+                  type: string
+                bio: # Optional field
+                  type: string
+              required:
+                  - email
+                  - name
+                  - username
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request. Username and email should be unique.
+    get:
+      summary: Retrieve all users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /users/{id}:
+    get:
+      summary: Retrieve a specific user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to retrieve
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+    put:
+      summary: Update a specific user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bio:
+                  type: string
+                name:
+                  type: string
+                image:
+                  type: string
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Failed to update the user
+    delete:
+      summary: Delete a specific user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the user to delete
+      responses:
+        '200':
+          description: User deleted successfully
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-03-08T12:31:36.731Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-03-08T12:31:36.731Z"
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        username:
+          type: string
+        image:
+          type: string
+        bio:
+          type: string
+        isVerified:
+          type: boolean
+      required:
+        - id
+        - email
+        - name
+        - username
+        - isVerified
