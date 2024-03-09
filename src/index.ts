@@ -8,8 +8,6 @@ import YAML from "yamljs";
 const app = express();
 const swaggerSpec = YAML.load('api-spec.yaml');
 
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
-
 app.use(express.json());
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/tweets", tweetRoutes);
