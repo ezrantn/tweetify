@@ -4,26 +4,39 @@ import { PrismaClient } from "@prisma/client";
 const router = Router();
 const prisma = new PrismaClient();
 
+
+// Create Tweet
 router.post("/", async (req, res) => {
-  const { content, image, userId } = req.body;
-  try {
-    const result = await prisma.tweet.create({
-      data: {
-        content,
-        image,
-        userId, // TODO manage based on the auth user
-      },
-    });
-    res.json({
-      status: true,
-      message: "Tweet created successfully",
-      data: result,
-    });
-  } catch (error) {
-    res.status(400).json({ status: false, message: "Failed to create tweet" });
+  const { content, image } = req.body;
+  const authHeader = req.headers["authorization"];
+  const token = authHeader?.split(" ")[1];
+
+  if (!token) {
+    return res.sendStatus(404).json({ status: false, message: "Unauthorized"})
   }
+  console.log(token);
+
+  res.sendStatus(200);
+
+  // try {
+  //   const result = await prisma.tweet.create({
+  //     data: {
+  //       content,
+  //       image,
+  //       userId, // TODO manage based on the auth user
+  //     },
+  //   });
+  //   res.json({
+  //     status: true,
+  //     message: "Tweet created successfully",
+  //     data: result,
+  //   });
+  // } catch (error) {
+  //   res.status(400).json({ status: false, message: "Failed to create tweet" });
+  // }
 });
 
+// Get All Tweets
 router.get("/", async (req, res) => {
   const allTweets = await prisma.tweet.findMany({
     include: {
@@ -57,6 +70,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Get Tweet by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   const result = await prisma.tweet.findUnique({
