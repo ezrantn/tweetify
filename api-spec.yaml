@@ -19,12 +19,16 @@ paths:
                 email:
                   type: string
                   format: email
+                  example: john@doe.com
                 name:
                   type: string
+                  example: John Doe
                 username:
                   type: string
+                  example: John
                 bio: # Optional field
                   type: string
+                  example: "optional"
               required:
                   - email
                   - name
@@ -35,9 +39,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User created successfully
+                  data:
+                    $ref: '#/components/schemas/User'
         '400':
           description: Bad request. Username and email should be unique.
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  status: 
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Username and email should be unique
     get:
       summary: Retrieve all users
       responses:
@@ -119,6 +143,7 @@ components:
       properties:
         id:
           type: integer
+          example: 1
         createdAt:
           type: string
           format: date-time
@@ -130,16 +155,22 @@ components:
         email:
           type: string
           format: email
+          example: john@doe.com
         name:
           type: string
+          example: John Doe
         username:
           type: string
+          example: John
         image:
           type: string
+          example: "optional"
         bio:
           type: string
+          example: "optional"
         isVerified:
           type: boolean
+          default: false
       required:
         - id
         - email
