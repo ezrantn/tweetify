@@ -28,13 +28,14 @@ paths:
                   example: John
                 bio: # Optional field
                   type: string
-                  example: "optional"
+                  nullable: true
+                  example: null
               required:
-                  - email
-                  - name
-                  - username
+                - email
+                - name
+                - username
       responses:
-        '200':
+        "200":
           description: User created successfully
           content:
             application/json:
@@ -48,15 +49,15 @@ paths:
                     type: string
                     example: User created successfully
                   data:
-                    $ref: '#/components/schemas/User'
-        '400':
+                    $ref: "#/components/schemas/User"
+        "400":
           description: Bad request. Username and email should be unique.
-          content: 
+          content:
             application/json:
-              schema: 
+              schema:
                 type: object
                 properties:
-                  status: 
+                  status:
                     type: boolean
                     example: false
                   message:
@@ -65,14 +66,37 @@ paths:
     get:
       summary: Retrieve all users
       responses:
-        '200':
+        "200":
           description: List of users
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Users listed successfully
+                  data:
+                    type: array
+                    items: 
+                      $ref: "#/components/schemas/User"
+        "400":
+          description: Error while fetching users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: An error occurred while fetching users. Please try again later.
+
   /users/{id}:
     get:
       summary: Retrieve a specific user
@@ -84,14 +108,26 @@ paths:
             type: integer
           description: ID of the user to retrieve
       responses:
-        '200':
+        "200":
           description: User found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
+                $ref: "#/components/schemas/UserWithTweets"
+        "404":
           description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: User not found
+
     put:
       summary: Update a specific user
       parameters:
@@ -108,21 +144,53 @@ paths:
             schema:
               type: object
               properties:
-                bio:
-                  type: string
+                email:
+                  format: email
+                  example: john@doe.com
                 name:
                   type: string
+                  example: Daenerys Targaryen
+                username:
+                  type: string
+                  example: Daenerys
                 image:
                   type: string
+                  nullable: true
+                  example: null
+                bio:
+                  type: string
+                  nullable: true
+                  example: Hey there! 
       responses:
-        '200':
+        "200":
           description: User updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User updated successfully
+                  data:
+                    $ref: "#/components/schemas/UserUpdated"
+                    
+        "400":
           description: Failed to update the user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to update the user
     delete:
       summary: Delete a specific user
       parameters:
@@ -133,11 +201,58 @@ paths:
             type: integer
           description: ID of the user to delete
       responses:
-        '200':
+        "200":
           description: User deleted successfully
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User deleted successfully
+                  data:
+                    $ref: "#/components/schemas/UserUpdated"
+        "400": 
+          description: Failed to delete the user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: Failed to delete the user
 components:
   schemas:
+    UserWithTweets:
+      type: object
+      properties:
+        status:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "User get by id found successfully"
+        user:
+          $ref: "#/components/schemas/UserWithTweetsAndTweets"
+
+    UserWithTweetsAndTweets:
+      allOf:
+        - $ref: "#/components/schemas/User"
+        - type: object
+          properties:
+            tweets:
+              type: array
+              items:
+                $ref: "#/components/schemas/Tweet"
+
     User:
       type: object
       properties:
@@ -164,16 +279,76 @@ components:
           example: John
         image:
           type: string
-          example: "optional"
+          nullable: true
+          example: null
         bio:
           type: string
-          example: "optional"
+          nullable: true
+          example: null
         isVerified:
           type: boolean
-          default: false
-      required:
-        - id
-        - email
-        - name
-        - username
-        - isVerified
+          example: false
+
+    UserUpdated:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-03-08T12:31:36.731Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-03-08T12:31:36.731Z"
+        email:
+          type: string
+          format: email
+          example: john@doe.com
+        name:
+          type: string
+          example: Daenerys Targaryen
+        username:
+          type: string
+          example: Daenerys
+        image:
+          type: string
+          nullable: true
+          example: null
+        bio:
+          type: string
+          nullable: true
+          example: Hey there!
+        isVerified:
+          type: boolean
+          example: false
+
+    Tweet:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        createdAt:
+          type: string
+          format: date-time
+          example: "2024-03-07T11:18:02.654Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-03-07T11:18:02.654Z"
+        content:
+          type: string
+          example: "Hello from thunder client"
+        image:
+          type: string
+          nullable: true
+          example: null
+        impression:
+          type: integer
+          example: 0
+        userId:
+          type: integer
+          example: 1
