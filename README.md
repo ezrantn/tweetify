@@ -17,14 +17,16 @@ The API documentation can be accessed at `localhost:3000/api-docs`.
 Follow these steps to run the project:
 
 1. Clone this repository:
+   
     ```bash
     git clone https://github.com/ezrantn/tweetify.git
     ```
-2. Launch the project in development mode:
+3. Launch the project in development mode:
+   
     ```bash
     npm run dev
     ```
-3. Access the API documentation at `localhost:3000/api-docs`.
+5. Access the API documentation at `localhost:3000/api-docs`.
 
 ## Contribution
 I welcome contributions to enhance the functionality and features of this Twitter API clone project. To contribute, please follow these steps:
