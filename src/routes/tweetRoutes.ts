@@ -1,16 +1,22 @@
 import { Router, Request, Response } from "express";
 import { PrismaClient, User } from "@prisma/client";
-import jwt from "jsonwebtoken";
 
 const router = Router();
 const prisma = new PrismaClient();
 
+type AuthRequest = Request & { user?: User };
+
 // Create Tweet
-router.post("/", async (req, res) => {
+router.post("/", async (req: AuthRequest, res: Response) => {
   const { content, image } = req.body;
-  // @ts-ignore
   const user = req.user;
-  
+
+  if (!user) {
+    return res
+      .status(400)
+      .json({ status: false, message: "User not authenticated" });
+  }
+
   try {
     const result = await prisma.tweet.create({
       data: {
