@@ -1,39 +1,32 @@
-import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import { Router, Request, Response } from "express";
+import { PrismaClient, User } from "@prisma/client";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 const prisma = new PrismaClient();
 
-
 // Create Tweet
 router.post("/", async (req, res) => {
   const { content, image } = req.body;
-  const authHeader = req.headers["authorization"];
-  const token = authHeader?.split(" ")[1];
-
-  if (!token) {
-    return res.sendStatus(404).json({ status: false, message: "Unauthorized"})
+  // @ts-ignore
+  const user = req.user;
+  
+  try {
+    const result = await prisma.tweet.create({
+      data: {
+        content,
+        image,
+        userId: user.id,
+      },
+    });
+    res.json({
+      status: true,
+      message: "Tweet created successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({ status: false, message: "Failed to create tweet" });
   }
-  console.log(token);
-
-  res.sendStatus(200);
-
-  // try {
-  //   const result = await prisma.tweet.create({
-  //     data: {
-  //       content,
-  //       image,
-  //       userId, // TODO manage based on the auth user
-  //     },
-  //   });
-  //   res.json({
-  //     status: true,
-  //     message: "Tweet created successfully",
-  //     data: result,
-  //   });
-  // } catch (error) {
-  //   res.status(400).json({ status: false, message: "Failed to create tweet" });
-  // }
 });
 
 // Get All Tweets
