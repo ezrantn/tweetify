@@ -18,7 +18,7 @@ Follow these steps to run the project:
 
 1. Clone this repository:
     ```bash
-    git clone https://github.com/ezrantn/tweetify
+    git clone https://github.com/ezrantn/tweetify.git
     ```
 2. Launch the project in development mode:
     ```bash
