@@ -1,12 +1,20 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const router = Router();
 const prisma = new PrismaClient();
 
-// Create User
+// Create User 
+//! ERROR Unauthorized (Probably in the middleware) "I'll check that later"
 router.post("/", async (req, res) => {
   const { email, name, username } = req.body;
+
+  if (!email || !name || !username) {
+    return res
+      .status(422)
+      .json({ status: false, message: "Body cannot be empty" });
+  }
+
   try {
     const result = await prisma.user.create({
       data: {
@@ -16,11 +24,28 @@ router.post("/", async (req, res) => {
         bio: "Hello, I'm new on Twitter",
       },
     });
-    res.json({ status: true, message: "User created successfully", data: result });
+    res.status(201).json({
+      status: true,
+      message: "User created successfully",
+      data: result,
+    });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return res
+        .status(409)
+        .json({ status: false, message: "Username or email already exists" });
+    }
+
+    console.error("Error creating user:", error);
     res
-      .status(400)
-      .json({ status: false, message: "Username and email should be unique" });
+      .status(500)
+      .json({
+        status: false,
+        message: "An error occurred while creating the user",
+      });
   }
 });
 
@@ -33,7 +58,11 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    res.json({ status: true, message: "Users listed successfully", data: allUser });
+    res.json({
+      status: true,
+      message: "Users listed successfully",
+      data: allUser,
+    });
   } catch (error) {
     res.status(500).json({
       status: false,
@@ -75,7 +104,11 @@ router.put("/:id", async (req, res) => {
         email,
       },
     });
-    res.json({ status: true, message: "User updated successfully", data: result });
+    res.json({
+      status: true,
+      message: "User updated successfully",
+      data: result,
+    });
   } catch (error) {
     res
       .status(400)
