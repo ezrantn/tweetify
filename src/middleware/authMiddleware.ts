@@ -15,7 +15,7 @@ export async function authMiddleware(
   const jwtToken = authHeader?.split(" ")[1];
 
   if (!jwtToken) {
-    return res.sendStatus(401).json({ status: false, message: "Unauthorized" });
+    return res.status(401).json({ status: false, message: "Unauthorized" });
   }
 
   // decode the jwt token
@@ -34,8 +34,8 @@ export async function authMiddleware(
 
     req.user = dbToken.user;
   } catch (error) {
-    return res.sendStatus(401).json({ status: false, message: "Unauthorized" });
+    console.error("Error in authentication middleware:", error);
+    return res.status(401).json({ status: false, message: "Unauthorized" });
   }
-
   next();
 }
