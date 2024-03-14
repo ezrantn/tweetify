@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { sendEmailToken } from "../services/emailService";
 
 const EMAIL_TOKEN_EXPIRATION_MINUTES = 10;
 const AUTHENTICATION_EXPIRATION_HOURS = 12;
-const JWT_SECRET = "SUPER SECRET"
+const JWT_SECRET = process.env.JWT_SECRET || "SUPER SECRET";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -44,6 +45,7 @@ router.post("/login", async (req, res) => {
       },
     });
     // send emailToken to user's email
+    await sendEmailToken(email, emailToken);
     res.sendStatus(200);
   } catch (error) {
     res.status(400).json({ error: "Failed to create token" });
