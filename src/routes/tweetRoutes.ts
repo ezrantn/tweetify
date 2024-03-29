@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
+import { prismaClient } from "../prisma-client";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 type AuthRequest = Request & { user?: User };
 
@@ -24,7 +24,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
   }
 
   try {
-    const result = await prisma.tweet.create({
+    const result = await prismaClient.tweet.create({
       data: {
         content,
         image,
@@ -45,7 +45,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 // Get All Tweets
 router.get("/", async (req, res) => {
   try {
-    const allTweets = await prisma.tweet.findMany({
+    const allTweets = await prismaClient.tweet.findMany({
       include: {
         user: {
           select: {
@@ -86,7 +86,7 @@ router.get("/:id", async (req, res) => {
     return res.status(400).json({ status: false, message: "Invalid tweet ID" });
   }
   try {
-    const result = await prisma.tweet.findUnique({
+    const result = await prismaClient.tweet.findUnique({
       where: { id: Number(id) },
       include: { user: true },
     });
@@ -126,7 +126,7 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
-    const result = await prisma.tweet.update({
+    const result = await prismaClient.tweet.update({
       where: { id: Number(id) },
       data: {
         content,
@@ -158,7 +158,7 @@ router.delete("/:id", async (req, res) => {
   }
 
   try {
-    const deletedTweet = await prisma.tweet.delete({
+    const deletedTweet = await prismaClient.tweet.delete({
       where: { id: Number(id) },
     });
 
@@ -175,13 +175,11 @@ router.delete("/:id", async (req, res) => {
     });
   } catch (error) {
     console.error("Error while deleting tweet:", error);
-    res
-      .status(500)
-      .json({
-        status: false,
-        message:
-          "An error occurred while deleting the tweet. Please try again later.",
-      });
+    res.status(500).json({
+      status: false,
+      message:
+        "An error occurred while deleting the tweet. Please try again later.",
+    });
   }
 });
 

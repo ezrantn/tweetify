@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { prismaClient } from "../prisma-client";
 
 const router = Router();
-const prisma = new PrismaClient();
 
-// Create User 
+// Create User
 //! ERROR Unauthorized (Probably in the middleware) "I'll check that later"
 router.post("/", async (req, res) => {
   const { email, name, username } = req.body;
@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const result = await prisma.user.create({
+    const result = await prismaClient.user.create({
       data: {
         email,
         name,
@@ -40,18 +40,16 @@ router.post("/", async (req, res) => {
     }
 
     console.error("Error creating user:", error);
-    res
-      .status(500)
-      .json({
-        status: false,
-        message: "An error occurred while creating the user",
-      });
+    res.status(500).json({
+      status: false,
+      message: "An error occurred while creating the user",
+    });
   }
 });
 
 // Get All Users
 router.get("/", async (req, res) => {
-  const allUser = await prisma.user.findMany();
+  const allUser = await prismaClient.user.findMany();
 
   if (allUser.length === 0) {
     res.status(404).json({ status: false, message: "No users found" });
@@ -75,7 +73,7 @@ router.get("/", async (req, res) => {
 // Get User by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const user = await prisma.user.findUnique({
+  const user = await prismaClient.user.findUnique({
     where: { id: Number(id) },
     include: { tweets: true },
   });
@@ -94,7 +92,7 @@ router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { bio, name, image, username, email } = req.body;
   try {
-    const result = await prisma.user.update({
+    const result = await prismaClient.user.update({
       where: { id: Number(id) },
       data: {
         bio,
@@ -120,7 +118,9 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const deletedUser = await prisma.user.delete({ where: { id: Number(id) } });
+    const deletedUser = await prismaClient.user.delete({
+      where: { id: Number(id) },
+    });
     res.json({
       status: true,
       message: "User deleted successfully",
