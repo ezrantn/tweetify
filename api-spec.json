@@ -346,8 +346,93 @@
             }
           }
         }
-      }
-    },
+      },
+      "/tweets": {
+        "post": {
+          "summary": "To create tweet",
+            "requestBody": {
+              "required": false,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@doe.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "John"
+                      },
+                      "bio": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": null
+                      }
+                    },
+                    "required": [
+                      "email",
+                      "name",
+                      "username"
+                    ]
+                  }
+                }
+              }
+            },
+            "responses": {
+              "200": {
+                "description": "User created successfully",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "boolean",
+                          "example": true
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "User created successfully"
+                        },
+                        "data": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Bad request. Username and email should be unique.",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "boolean",
+                          "example": false
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Username and email should be unique"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
     "components": {
       "schemas": {
         "UserWithTweets": {
