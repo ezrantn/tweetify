@@ -6,51 +6,57 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   email String @unique
 
-  name String? 
-  username String? @unique
-  image String?
-  bio String?
+  name       String?
+  username   String? @unique
+  image      String?
+  bio        String?
   isVerified Boolean @default(false)
 
   tweets Tweet[]
   tokens Token[]
+
+  @@map("users")
 }
 
 model Token {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  type String 
+  type       String
   emailToken String? @unique
 
-  valid Boolean @default(true)
-  expiration DateTime 
+  valid      Boolean  @default(true)
+  expiration DateTime
 
   userId Int
-  user User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("token")
 }
 
 model Tweet {
-  id Int @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  content String
-  image String?
-  impression Int @default(0)
+  content    String
+  image      String?
+  impression Int     @default(0)
 
   userId Int
-  user User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("tweets")
 }
