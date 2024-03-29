@@ -10,7 +10,7 @@ The API documentation can be accessed at `localhost:3000/api-docs`.
 - NodeJS
 - ExpressJS
 - Prisma
-- SQLite
+- PostgreSQL
 
 ## Running the Application
 
