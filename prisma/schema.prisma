@@ -15,12 +15,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email String @unique
+  email String @unique @db.VarChar(100)
 
-  name       String?
+  name       String? @db.VarChar(100)
   username   String? @unique
-  image      String?
-  bio        String?
+  image      String? @db.VarChar(100)
+  bio        String? @db.VarChar(100)
   isVerified Boolean @default(false)
 
   tweets Tweet[]
@@ -34,8 +34,8 @@ model Token {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  type       String
-  emailToken String? @unique
+  type       String  @db.VarChar(100)
+  emailToken String? @unique @db.VarChar(100)
 
   valid      Boolean  @default(true)
   expiration DateTime
@@ -51,8 +51,8 @@ model Tweet {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  content    String
-  image      String?
+  content    String  @db.VarChar(100)
+  image      String? @db.VarChar(100)
   impression Int     @default(0)
 
   userId Int
