@@ -1,6 +1,6 @@
 # Tweetify
 
-This repository offers an illustrative demonstration of a Twitter API clone, which is designed for **educational purposes and personal learning**. It's important to emphasize that this project is purely for fun and for the enrichment of individual understanding. While it mimics the functionality of Twitter's API, it's crucial to note that it is **not** affiliated with the official Twitter platform. Instead, it serves as a learning tool for exploring the concepts and mechanics behind building social media APIs.
+This is a Twitter API clone for learning, not affiliated with the official platform. It's for educational purposes and personal exploration of social media API concepts.
 
 ## Swagger
 The API documentation can be accessed at `localhost:3000/api-docs`.
@@ -10,7 +10,7 @@ The API documentation can be accessed at `localhost:3000/api-docs`.
 - NodeJS
 - ExpressJS
 - Prisma
-- SQLite
+- PostgreSQL
 
 ## Running the Application
 
@@ -21,12 +21,21 @@ Follow these steps to run the project:
     ```bash
     git clone https://github.com/ezrantn/tweetify.git
     ```
+
+2. Install dependencies:
+   
+    ```bash
+    npm install
+    ```
+
 3. Launch the project in development mode:
    
     ```bash
     npm run dev
     ```
-5. Access the API documentation at `localhost:3000/api-docs`.
+
+4. Access the API documentation at `localhost:3000/api-docs`.
+
 
 ## Contribution
 I welcome contributions to enhance the functionality and features of this Twitter API clone project. To contribute, please follow these steps:
