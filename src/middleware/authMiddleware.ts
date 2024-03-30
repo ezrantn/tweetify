@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import { PrismaClient, User } from "@prisma/client";
 
 const JWT_SECRET = process.env.JWT_SECRET || "SUPER SECRET";
-console.log("JWT secret: ", JWT_SECRET);
 const prisma = new PrismaClient();
 type AuthRequest = Request & { user?: User };
 
@@ -16,7 +15,7 @@ export async function authMiddleware(
   const jwtToken = authHeader?.split(" ")[1];
 
   if (!jwtToken) {
-    return res.status(401).json({ status: false, message: "Unauthorized" });
+    return res.status(401).json({ status: false, message: `Unauthorized: No token provided` });
   }
 
   // decode the jwt token
@@ -30,13 +29,13 @@ export async function authMiddleware(
     });
 
     if (!dbToken?.valid || dbToken.expiration < new Date()) {
-      return res.status(401).json({ status: false, message: "Unauthorized" });
+      return res.status(401).json({ status: false, message: `Unauthorized: Token is invalid or expired` });
     }
 
     req.user = dbToken.user;
   } catch (error) {
     console.error("Error in authentication middleware:", error);
-    return res.status(401).json({ status: false, message: "Unauthorized" });
+    return res.status(401).json({ status: false, message: `Unauthorized: Error in authentication middleware"` });
   }
   next();
 }

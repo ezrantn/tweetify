@@ -5,7 +5,6 @@ import { prismaClient } from "../prisma-client";
 const router = Router();
 
 // Create User
-//! ERROR Unauthorized (Probably in the middleware) "I'll check that later"
 router.post("/", async (req, res) => {
   const { email, name, username } = req.body;
 

@@ -1,14 +1,13 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { sendEmailToken } from "../services/emailService";
+import { prismaClient } from "../prisma-client";
 
 const EMAIL_TOKEN_EXPIRATION_MINUTES = 10;
 const AUTHENTICATION_EXPIRATION_HOURS = 12;
 const JWT_SECRET = process.env.JWT_SECRET || "SUPER SECRET";
 
 const router = Router();
-const prisma = new PrismaClient();
 
 function generateEmailToken(): string {
   return Math.floor(10000000 + Math.random() * 90000000).toString();
@@ -31,7 +30,7 @@ router.post("/login", async (req, res) => {
     new Date().getTime() + EMAIL_TOKEN_EXPIRATION_MINUTES * 60 * 1000
   );
   try {
-    const createdToken = await prisma.token.create({
+    const createdToken = await prismaClient.token.create({
       data: {
         type: "EMAIL",
         emailToken,
@@ -57,7 +56,7 @@ router.post("/login", async (req, res) => {
 router.post("/authenticate", async (req, res) => {
   const { email, emailToken } = req.body;
 
-  const dbEmailToken = await prisma.token.findUnique({
+  const dbEmailToken = await prismaClient.token.findUnique({
     where: {
       emailToken,
     },
@@ -85,7 +84,7 @@ router.post("/authenticate", async (req, res) => {
     new Date().getTime() + AUTHENTICATION_EXPIRATION_HOURS * 60 * 60 * 1000
   );
 
-  const apiToken = await prisma.token.create({
+  const apiToken = await prismaClient.token.create({
     data: {
       type: "API",
       expiration,
@@ -98,7 +97,7 @@ router.post("/authenticate", async (req, res) => {
   });
 
   // Invalidate the email
-  await prisma.token.update({
+  await prismaClient.token.update({
     where: { id: dbEmailToken.id },
     data: { valid: false }
   });
