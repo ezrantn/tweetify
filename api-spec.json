@@ -1,144 +1,190 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "title": "User API",
-      "description": "CRUD operations for managing users in Twitter",
-      "version": "1.0.0"
-    },
-    "servers": [
-      {
-        "url": "http://localhost:3000/api/v1"
-      }
-    ],
-    "paths": {
-      "/users": {
-        "post": {
-          "summary": "Create a new user",
-          "requestBody": {
-            "required": false,
+  "openapi": "3.0.0",
+  "info": {
+    "title": "User API",
+    "description": "API Clone for Twitter",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1"
+    }
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "summary": "Create a new user",
+        "tags": ["User"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@doe.com"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "bio": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": null
+                  }
+                },
+                "required": ["email", "name", "username"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "email": {
-                      "type": "string",
-                      "format": "email",
-                      "example": "john@doe.com"
+                    "status": {
+                      "type": "boolean",
+                      "example": true
                     },
-                    "name": {
+                    "message": {
                       "type": "string",
-                      "example": "John Doe"
+                      "example": "User created successfully"
                     },
-                    "username": {
-                      "type": "string",
-                      "example": "John"
-                    },
-                    "bio": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
+                    "data": {
+                      "$ref": "#/components/schemas/User"
                     }
-                  },
-                  "required": [
-                    "email",
-                    "name",
-                    "username"
-                  ]
+                  }
                 }
               }
             }
           },
-          "responses": {
-            "200": {
-              "description": "User created successfully",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "User created successfully"
-                      },
-                      "data": {
+          "400": {
+            "description": "Bad request. Username and email should be unique.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Username and email should be unique"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve all users",
+        "tags": ["User"],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Users listed successfully"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
                         "$ref": "#/components/schemas/User"
                       }
                     }
                   }
                 }
               }
-            },
-            "400": {
-              "description": "Bad request. Username and email should be unique.",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": false
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "Username and email should be unique"
-                      }
+            }
+          },
+          "400": {
+            "description": "Error while fetching users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "An error occurred while fetching users. Please try again later."
                     }
                   }
                 }
               }
             }
           }
-        },
-        "get": {
-          "summary": "Retrieve all users",
-          "responses": {
-            "200": {
-              "description": "List of users",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "Users listed successfully"
-                      },
-                      "data": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#/components/schemas/User"
-                        }
-                      }
-                    }
-                  }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "summary": "Retrieve a specific user",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the user to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithTweets"
                 }
               }
-            },
-            "400": {
-              "description": "Error while fetching users",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": false
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "An error occurred while fetching users. Please try again later."
-                      }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User not found"
                     }
                   }
                 }
@@ -147,456 +193,460 @@
           }
         }
       },
-      "/users/{id}": {
-        "get": {
-          "summary": "Retrieve a specific user",
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              },
-              "description": "ID of the user to retrieve"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "User found",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/UserWithTweets"
-                  }
-                }
-              }
+      "put": {
+        "summary": "Update a specific user",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
             },
-            "404": {
-              "description": "User not found",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": false
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "User not found"
-                      }
-                    }
+            "description": "ID of the user to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "format": "email",
+                    "example": "john@doe.com"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "Daenerys Targaryen"
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "Daenerys"
+                  },
+                  "image": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": null
+                  },
+                  "bio": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Hey there!"
                   }
                 }
               }
             }
           }
         },
-        "put": {
-          "summary": "Update a specific user",
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              },
-              "description": "ID of the user to update"
-            }
-          ],
-          "requestBody": {
-            "required": true,
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "email": {
-                      "format": "email",
-                      "example": "john@doe.com"
+                    "status": {
+                      "type": "boolean",
+                      "example": true
                     },
-                    "name": {
+                    "message": {
                       "type": "string",
-                      "example": "Daenerys Targaryen"
+                      "example": "User updated successfully"
                     },
-                    "username": {
-                      "type": "string",
-                      "example": "Daenerys"
-                    },
-                    "image": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": null
-                    },
-                    "bio": {
-                      "type": "string",
-                      "nullable": true,
-                      "example": "Hey there!"
+                    "data": {
+                      "$ref": "#/components/schemas/UserUpdated"
                     }
                   }
                 }
               }
             }
           },
-          "responses": {
-            "200": {
-              "description": "User updated successfully",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "User updated successfully"
-                      },
-                      "data": {
-                        "$ref": "#/components/schemas/UserUpdated"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Failed to update the user",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": false
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "Failed to update the user"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "delete": {
-          "summary": "Delete a specific user",
-          "parameters": [
-            {
-              "in": "path",
-              "name": "id",
-              "required": true,
-              "schema": {
-                "type": "integer"
-              },
-              "description": "ID of the user to delete"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "User deleted successfully",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "User deleted successfully"
-                      },
-                      "data": {
-                        "$ref": "#/components/schemas/UserUpdated"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "400": {
-              "description": "Failed to delete the user",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "status": {
-                        "type": "boolean",
-                        "example": false
-                      },
-                      "message": {
-                        "type": "string",
-                        "example": "Failed to delete the user"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/tweets": {
-        "post": {
-          "summary": "To create tweet",
-            "requestBody": {
-              "required": false,
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "email": {
-                        "type": "string",
-                        "format": "email",
-                        "example": "john@doe.com"
-                      },
-                      "name": {
-                        "type": "string",
-                        "example": "John Doe"
-                      },
-                      "username": {
-                        "type": "string",
-                        "example": "John"
-                      },
-                      "bio": {
-                        "type": "string",
-                        "nullable": true,
-                        "example": null
-                      }
-                    },
-                    "required": [
-                      "email",
-                      "name",
-                      "username"
-                    ]
-                  }
-                }
-              }
-            },
-            "responses": {
-              "200": {
-                "description": "User created successfully",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "boolean",
-                          "example": true
-                        },
-                        "message": {
-                          "type": "string",
-                          "example": "User created successfully"
-                        },
-                        "data": {
-                          "$ref": "#/components/schemas/User"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "400": {
-                "description": "Bad request. Username and email should be unique.",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "boolean",
-                          "example": false
-                        },
-                        "message": {
-                          "type": "string",
-                          "example": "Username and email should be unique"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-    "components": {
-      "schemas": {
-        "UserWithTweets": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "boolean",
-              "example": true
-            },
-            "message": {
-              "type": "string",
-              "example": "User get by id found successfully"
-            },
-            "user": {
-              "$ref": "#/components/schemas/UserWithTweetsAndTweets"
-            }
-          }
-        },
-        "UserWithTweetsAndTweets": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/User"
-            },
-            {
-              "type": "object",
-              "properties": {
-                "tweets": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Tweet"
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "User": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "integer",
-              "example": 1
-            },
-            "createdAt": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-03-08T12:31:36.731Z"
-            },
-            "updatedAt": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-03-08T12:31:36.731Z"
-            },
-            "email": {
-              "type": "string",
-              "format": "email",
-              "example": "john@doe.com"
-            },
-            "name": {
-              "type": "string",
-              "example": "John Doe"
-            },
-            "username": {
-              "type": "string",
-              "example": "John"
-            },
-            "image": {
-              "type": "string",
-              "nullable": true,
-              "example": null
-            },
-            "bio": {
-              "type": "string",
-              "nullable": true,
-              "example": null
-            },
-            "isVerified": {
-              "type": "boolean",
-              "example": false
-            }
-          }
-        },
-        "UserUpdated": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "integer",
-              "example": 1
-            },
-            "createdAt": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-03-08T12:31:36.731Z"
-            },
-            "updatedAt": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-03-08T12:31:36.731Z"
-            },
-            "email": {
-              "type": "string",
-              "format": "email",
-              "example": "john@doe.com"
-            },
-            "name": {
-              "type": "string",
-              "example": "Daenerys Targaryen"
-            },
-            "username": {
-              "type": "string",
-              "example": "Daenerys"
-            },
-            "image": {
-              "type": "string",
-              "nullable": true,
-              "example": null
-            },
-            "bio": {
-              "type": "string",
-              "nullable": true,
-              "example": "Hey there!"
-            },
-            "isVerified": {
-              "type": "boolean",
-              "example": false
-            }
-          }
-        },
-        "Tweet": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "integer",
-              "example": 2
-            },
-            "createdAt": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-03-07T11:18:02.654Z"
-            },
-            "updatedAt": {
-              "type": "string",
-              "format": "date-time",
-              "example": "2024-03-07T11:18:02.654Z"
-            },
+          "400": {
+            "description": "Failed to update the user",
             "content": {
-              "type": "string",
-              "example": "Hello from thunder client"
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Failed to update the user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a specific user",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
             },
-            "image": {
-              "type": "string",
-              "nullable": true,
-              "example": null
-            },
-            "impression": {
-              "type": "integer",
-              "example": 0
-            },
-            "userId": {
-              "type": "integer",
-              "example": 1
+            "description": "ID of the user to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User deleted successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserUpdated"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Failed to delete the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Failed to delete the user"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tweets": {
+      "post": {
+        "summary": "To create tweet",
+        "tags": ["Tweet"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@doe.com"
+                  },
+                  "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "username": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "bio": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": null
+                  }
+                },
+                "required": ["email", "name", "username"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "User created successfully"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Username and email should be unique.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Username and email should be unique"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "get": {
+      "summary": "Retrieve all users",
+      "tags": ["User"],
+      "responses": {
+        "200": {
+          "description": "List of users",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "Users listed successfully"
+                  },
+                  "data": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "400": {
+          "description": "Error while fetching users",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "boolean",
+                    "example": false
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "An error occurred while fetching users. Please try again later."
+                  }
+                }
+              }
             }
           }
         }
       }
     }
+  },
+  "components": {
+    "schemas": {
+      "UserWithTweets": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "User get by id found successfully"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserWithTweetsAndTweets"
+          }
+        }
+      },
+      "UserWithTweetsAndTweets": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "tweets": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Tweet"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@doe.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "username": {
+            "type": "string",
+            "example": "John"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "isVerified": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "UserUpdated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "john@doe.com"
+          },
+          "name": {
+            "type": "string",
+            "example": "Daenerys Targaryen"
+          },
+          "username": {
+            "type": "string",
+            "example": "Daenerys"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "bio": {
+            "type": "string",
+            "nullable": true,
+            "example": "Hey there!"
+          },
+          "isVerified": {
+            "type": "boolean",
+            "example": false
+          }
+        }
+      },
+      "Tweet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 2
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-07T11:18:02.654Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-07T11:18:02.654Z"
+          },
+          "content": {
+            "type": "string",
+            "example": "Hello from thunder client"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "impression": {
+            "type": "integer",
+            "example": 0
+          },
+          "userId": {
+            "type": "integer",
+            "example": 1
+          }
+        }
+      }
+    }
   }
+}
