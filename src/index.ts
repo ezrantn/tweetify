@@ -1,12 +1,12 @@
 import express from "express";
-import userRoutes from "./routes/userRoutes";
-import tweetRoutes from "./routes/tweetRoutes";
-import authRoutes from "./routes/authRoutes";
-import { authMiddleware } from "./middleware/authMiddleware";
+import userRoutes from "./routes/user-routes";
+import tweetRoutes from "./routes/tweet-routes";
+import authRoutes from "./routes/auth-routes";
+import { authMiddleware } from "./middleware/auth-middleware";
 import swaggerUI from "swagger-ui-express";
 import swaggerDocument from "../api-spec.json";
 
-export const app = express();
+const app = express();
 
 app.use(express.json());
 app.use("/api/v1/users", authMiddleware, userRoutes);
