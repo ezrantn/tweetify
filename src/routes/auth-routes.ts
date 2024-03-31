@@ -1,30 +1,17 @@
-import { Router } from "express";
-import jwt from "jsonwebtoken";
 import { sendEmailToken } from "../services/emailService";
 import { prismaClient } from "../prisma-client";
+import z from "zod";
+import { generateAuthToken, generateEmailToken } from "../utils";
+import {
+  EMAIL_TOKEN_EXPIRATION_MINUTES,
+  AUTHENTICATION_EXPIRATION_HOURS,
+  router
+} from "../utils";
 
-const EMAIL_TOKEN_EXPIRATION_MINUTES = 10;
-const AUTHENTICATION_EXPIRATION_HOURS = 12;
-const JWT_SECRET = process.env.JWT_SECRET || "SUPER SECRET";
-
-const router = Router();
-
-function generateEmailToken(): string {
-  return Math.floor(10000000 + Math.random() * 90000000).toString();
-}
-
-function generateAuthToken(tokenId: number): string {
-  const jwtPayload = { tokenId };
-  return jwt.sign(jwtPayload, JWT_SECRET, {
-    algorithm: "HS256",
-    noTimestamp: true
-  })
-}
-
-// Create a user if it doesn't exist,
-// generate the emailToken and send it to their email
 router.post("/login", async (req, res) => {
-  const { email } = req.body;
+  const emailSchema = z.string().email().max(100).min(3);
+  const email = emailSchema.parse(req.body);
+
   const emailToken = generateEmailToken();
   const expiration = new Date(
     new Date().getTime() + EMAIL_TOKEN_EXPIRATION_MINUTES * 60 * 1000
@@ -43,7 +30,7 @@ router.post("/login", async (req, res) => {
         },
       },
     });
-    // send emailToken to user's email
+
     await sendEmailToken(email, emailToken);
     res.sendStatus(200);
   } catch (error) {
@@ -51,18 +38,20 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Validate the emailToken
-// Generate a long-lived JWT token
 router.post("/authenticate", async (req, res) => {
-  const { email, emailToken } = req.body;
+  const authSchema = z.object({
+    email: z.string().email().max(100).min(3),
+    emailToken: z.string().max(100).min(5),
+  });
+  const { email, emailToken } = authSchema.parse(req.body);
 
   const dbEmailToken = await prismaClient.token.findUnique({
     where: {
       emailToken,
     },
     include: {
-      user: true
-    }
+      user: true,
+    },
   });
 
   if (!dbEmailToken || !dbEmailToken.valid) {
@@ -70,15 +59,12 @@ router.post("/authenticate", async (req, res) => {
   }
 
   if (dbEmailToken.expiration < new Date()) {
-    return res.status(401).json({error : "Token expired!"});
+    return res.status(401).json({ error: "Token expired!" });
   }
 
   if (dbEmailToken?.user?.email !== email) {
     return res.sendStatus(401);
   }
-
-  // Here we validated that the user is the owner of the email
-  // generate an API token
 
   const expiration = new Date(
     new Date().getTime() + AUTHENTICATION_EXPIRATION_HOURS * 60 * 60 * 1000
@@ -96,14 +82,13 @@ router.post("/authenticate", async (req, res) => {
     },
   });
 
-  // Invalidate the email
   await prismaClient.token.update({
     where: { id: dbEmailToken.id },
-    data: { valid: false }
+    data: { valid: false },
   });
 
   // generate the JWT token
-  const authToken = generateAuthToken(apiToken.id)
+  const authToken = generateAuthToken(apiToken.id);
 
   res.json({ authToken });
 });

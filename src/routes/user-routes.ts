@@ -1,20 +1,25 @@
-import { Router } from "express";
 import { Prisma } from "@prisma/client";
 import { prismaClient } from "../prisma-client";
-
-const router = Router();
+import { z } from "zod";
+import { router } from "../utils";
 
 // Create User
 router.post("/", async (req, res) => {
-  const { email, name, username } = req.body;
-
-  if (!email || !name || !username) {
-    return res
-      .status(422)
-      .json({ status: false, message: "Body cannot be empty" });
-  }
+  const userSchema = z.object({
+    email: z.string().email().max(100).min(3),
+    name: z.string().min(1).trim(),
+    username: z.string().min(3).trim(),
+  });
 
   try {
+    const { email, name, username } = userSchema.parse(req.body);
+
+    if (!email || !name || !username) {
+      return res
+        .status(422)
+        .json({ status: false, message: "Body cannot be empty" });
+    }
+
     const result = await prismaClient.user.create({
       data: {
         email,
@@ -29,7 +34,12 @@ router.post("/", async (req, res) => {
       data: result,
     });
   } catch (error) {
-    if (
+    if (error.message === "zod-validation-error") {
+      return res.status(422).json({
+        status: false,
+        message: "Validation error: " + error.issues[0].message,
+      });
+    } else if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
@@ -48,13 +58,13 @@ router.post("/", async (req, res) => {
 
 // Get All Users
 router.get("/", async (req, res) => {
-  const allUser = await prismaClient.user.findMany();
-
-  if (allUser.length === 0) {
-    res.status(404).json({ status: false, message: "No users found" });
-  }
-
   try {
+    const allUser = await prismaClient.user.findMany();
+
+    if (allUser.length === 0) {
+      res.status(404).json({ status: false, message: "No users found" });
+    }
+
     res.json({
       status: true,
       message: "Users listed successfully",
@@ -72,25 +82,46 @@ router.get("/", async (req, res) => {
 // Get User by ID
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  const user = await prismaClient.user.findUnique({
-    where: { id: Number(id) },
-    include: { tweets: true },
-  });
-  if (!user) {
-    res.status(404).json({ status: false, message: "User not found" });
+
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: { id: Number(id) },
+      include: { tweets: true },
+    });
+    if (!user) {
+      res.status(404).json({ status: false, message: "User not found" });
+    }
+    res.json({
+      status: true,
+      message: "User get by id found successfully",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({
+      status: false,
+      message:
+        "An error occurred while fetching the user. Please try again later.",
+    });
   }
-  res.json({
-    status: true,
-    message: "User get by id found successfully",
-    data: user,
-  });
 });
 
 // Update User
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { bio, name, image, username, email } = req.body;
+
+  const updateUserSchema = z.object({
+    bio: z.string().optional(),
+    name: z.string().min(1).trim(),
+    image: z.string().optional(),
+    username: z.string().min(3).trim(),
+    email: z.string().email().max(100).min(3),
+  });
+
   try {
+    const { bio, name, image, username, email } = updateUserSchema.parse(
+      req.body
+    );
     const result = await prismaClient.user.update({
       where: { id: Number(id) },
       data: {
@@ -107,9 +138,18 @@ router.put("/:id", async (req, res) => {
       data: result,
     });
   } catch (error) {
-    res
-      .status(400)
-      .json({ status: false, message: "Failed to update the user" });
+    if (error.code === "zod-validation-error") {
+      return res.status(422).json({
+        status: false,
+        message: "Validation error: " + error.issues[0].message,
+      });
+    } else {
+      console.error("Error updating user:", error);
+      res.status(500).json({
+        status: false,
+        message: "Failed to update the user",
+      });
+    }
   }
 });
 

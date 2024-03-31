@@ -1,8 +1,7 @@
-import { Router, Request, Response } from "express";
+import { Request, Response } from "express";
 import { User } from "@prisma/client";
 import { prismaClient } from "../prisma-client";
-
-const router = Router();
+import { router } from "../utils";
 
 type AuthRequest = Request & { user?: User };
 
