@@ -1,16 +1,19 @@
-import { sendEmailToken } from "../services/emailService";
+import { sendEmailToken } from "../services/email-service";
 import { prismaClient } from "../prisma-client";
 import z from "zod";
 import { generateAuthToken, generateEmailToken } from "../utils";
 import {
   EMAIL_TOKEN_EXPIRATION_MINUTES,
   AUTHENTICATION_EXPIRATION_HOURS,
-  router
+  router,
 } from "../utils";
 
 router.post("/login", async (req, res) => {
-  const emailSchema = z.string().email().max(100).min(3);
-  const email = emailSchema.parse(req.body);
+  const emailSchema = z.object({
+    email: z.string().email().max(100).min(3),
+  });
+
+  const { email } = emailSchema.parse(req.body);
 
   const emailToken = generateEmailToken();
   const expiration = new Date(
