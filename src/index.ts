@@ -7,12 +7,18 @@ import swaggerUI from "swagger-ui-express";
 import swaggerDocument from "../api-spec.json";
 
 const app = express();
+const apiPrefix = "/api/v1";
 
 app.use(express.json());
-app.use("/api/v1/users", authMiddleware, userRoutes);
-app.use("/api/v1/tweets", authMiddleware, tweetRoutes);
-app.use("/api/v1/auth", authRoutes);
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+
+app.use(`${apiPrefix}/users`, authMiddleware, userRoutes);
+app.use(`${apiPrefix}/tweets`, authMiddleware, tweetRoutes);
+app.use(`${apiPrefix}/auth`, authRoutes);
+app.use(
+  `${apiPrefix}/docs`,
+  swaggerUI.serve,
+  swaggerUI.setup(swaggerDocument)
+);
 
 app.get("/", (req, res) => {
   res.send("Hello World. Updated");
