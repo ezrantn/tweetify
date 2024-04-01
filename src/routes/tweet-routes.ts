@@ -2,12 +2,18 @@ import { Request, Response } from "express";
 import { User } from "@prisma/client";
 import { prismaClient } from "../prisma-client";
 import { router } from "../utils";
+import { z } from "zod";
 
 type AuthRequest = Request & { user?: User };
 
 // Create Tweet
 router.post("/", async (req: AuthRequest, res: Response) => {
-  const { content, image } = req.body;
+  const tweetSchema = z.object({
+    content: z.string().min(3),
+    image: z.string().optional(),
+  });
+
+  const { content, image } = tweetSchema.parse(req.body);
   const user = req.user;
 
   if (!user) {
@@ -112,7 +118,14 @@ router.get("/:id", async (req, res) => {
 // Update Tweet
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { content, image, userId } = req.body;
+
+  const tweetSchema = z.object({
+    content: z.string().min(3),
+    image: z.string().optional(),
+    userId: z.number(),
+  });
+
+  const { content, image, userId } = tweetSchema.parse(req.body);
 
   if (!id || parseInt(id) <= 0) {
     return res.status(400).json({ status: false, message: "Invalid tweet ID" });
