@@ -1,9 +1,9 @@
 # Tweetify
 
-This is a Twitter API clone for learning, not affiliated with the official platform. It's for educational purposes and personal exploration of social media API concepts.
+Tweetify is a Twitter API clone designed for educational purposes and personal exploration of social media API concepts. It is not affiliated with the official Twitter platform.
 
-## Swagger
-The API documentation can be accessed at `localhost:3000/api-docs`.
+## Swagger Documentation
+Explore the API documentation by visiting `localhost:3000/api/v1/docs`.
 
 ## Tech Stack
 - TypeScript
@@ -12,9 +12,9 @@ The API documentation can be accessed at `localhost:3000/api-docs`.
 - Prisma
 - PostgreSQL
 
-## Running the Application
+## Getting Started
 
-Follow these steps to run the project:
+Follow these steps to run the project locally:
 
 1. Clone this repository:
    
@@ -34,33 +34,12 @@ Follow these steps to run the project:
     npm run dev
     ```
 
-4. Access the API documentation at `localhost:3000/api-docs`.
+4. Access the API documentation at `localhost:3000/api/v1/docs`.
 
 
-## Contribution
-I welcome contributions to enhance the functionality and features of this Twitter API clone project. To contribute, please follow these steps:
+## Support or Feedback
 
-1. Fork the repository to your GitHub account.
-
-2. Create a new branch from the main branch for your changes:
-    ```bash
-    git checkout -b feature/your-feature-name
-    ```
-3. Make your modifications and ensure that your code adheres to the project's coding standards.
-
-4. Test your changes thoroughly to ensure they function as expected.
-
-5. Commit your changes with descriptive commit messages:
-    ```bash
-    git commit -m "Add feature: your feature name"
-    ```
-6. Push your changes to your forked repository:
-    ```bash
-    git push origin feature/your-feature-name
-    ```
-7. Open a pull request on the original repository's main branch and provide a detailed description of your changes.
-
-Once your pull request is submitted, it will be reviewed by the project maintainers. Thank you for your contribution!
+Your feedback and suggestions are welcome! If you encounter any issues or have ideas for improvements, please open an issue on the [GitHub repository](https://github.com/ezrantn/tweetify).
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/ezrantn/tweetify/blob/main/LICENSE) file for details.
