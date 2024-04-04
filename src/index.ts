@@ -1,24 +1,42 @@
 import express from "express";
-import userRoutes from "./routes/user-routes";
-import tweetRoutes from "./routes/tweet-routes";
-import authRoutes from "./routes/auth-routes";
+import tweetRoutes from "./route/tweet-routes";
+import authRoutes from "./route/auth-routes";
 import { authMiddleware } from "./middleware/auth-middleware";
 import swaggerUI from "swagger-ui-express";
 import swaggerDocument from "../api-spec.json";
+import UserController  from "./controller/user-controller";
 
 const app = express();
 const apiPrefix = "/api/v1";
 
 app.use(express.json());
 
-app.use(`${apiPrefix}/users`, authMiddleware, userRoutes);
+// User Routes
+app.post(`${apiPrefix}/users`, UserController.createUserController);
+app.get(
+  `${apiPrefix}/users/`,
+  authMiddleware,
+  UserController.getAllUsersController
+);
+app.get(
+  `${apiPrefix}/users/:id`,
+  authMiddleware,
+  UserController.getUserByIDController
+);
+app.put(
+  `${apiPrefix}/users/:id`,
+  authMiddleware,
+  UserController.updateUserController
+);
+app.delete(
+  `${apiPrefix}/users/:id`,
+  authMiddleware,
+  UserController.deleteUserController
+);
+
 app.use(`${apiPrefix}/tweets`, authMiddleware, tweetRoutes);
 app.use(`${apiPrefix}/auth`, authRoutes);
-app.use(
-  `${apiPrefix}/docs`,
-  swaggerUI.serve,
-  swaggerUI.setup(swaggerDocument)
-);
+app.use(`${apiPrefix}/docs`, swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 app.get("/", (req, res) => {
   res.send("Hello World. Updated");
