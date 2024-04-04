@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { User } from "@prisma/client";
-import { prismaClient } from "../prisma-client";
-import { JWT_SECRET } from "../utils";
+import { prismaClient } from "../application/database";
+import { JWT_SECRET } from "../application/utils";
 
 type AuthRequest = Request & { user?: User };
 
