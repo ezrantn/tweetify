@@ -29,13 +29,13 @@ const getAllUsersController = async (
 ): Promise<void> => {
   try {
     const allUsers = await UserService.getAllUsers();
-    res.json({
+    res.status(200).json({
       status: true,
       message: "Users retrieved successfully",
       data: allUsers,
     });
   } catch (error) {
-    console.error("Error retrieving users:", error);
+    logger.error("Error retrieving users:", error);
     res.status(error.statusCode || 500).json({
       status: false,
       message: error.message || "Failed to retrieve users",
@@ -47,16 +47,16 @@ const getUserByIDController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { id } = req.params;
   try {
+    const { id } = req.params;
     const user = await UserService.getUserByID(id);
-    res.json({
+    res.status(200).json({
       status: true,
       message: "User retrieved successfully",
       data: user,
     });
   } catch (error) {
-    console.error("Error retrieving user:", error);
+    logger.error("Error retrieving user:", error);
     res.status(error.statusCode || 500).json({
       status: false,
       message: error.message || "Failed to retrieve user",
@@ -68,17 +68,17 @@ const updateUserController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { id } = req.params;
-  const userData = req.body;
   try {
+    const { id } = req.params;
+    const userData = req.body;
     const updatedUser = await UserService.updateUser(id, userData);
-    res.json({
+    res.status(200).json({
       status: true,
       message: "User updated successfully",
       data: updatedUser,
     });
   } catch (error) {
-    console.error("Error updating user:", error);
+    logger.error("Error updating user:", error);
     res.status(error.statusCode || 500).json({
       status: false,
       message: error.message || "Failed to update user",
@@ -90,16 +90,12 @@ const deleteUserController = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { id } = req.params;
   try {
-    const deletedUser = await UserService.deleteUser(id);
-    res.json({
-      status: true,
-      message: "User deleted successfully",
-      data: deletedUser,
-    });
+    const { id } = req.params;
+    await UserService.deleteUser(id);
+    res.sendStatus(204);
   } catch (error) {
-    console.error("Error deleting user:", error);
+    logger.error("Error deleting user:", error);
     res.status(error.statusCode || 500).json({
       status: false,
       message: error.message || "Failed to delete user",
