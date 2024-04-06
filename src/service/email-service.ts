@@ -1,44 +1,18 @@
 import { SendEmailCommand, SESClient } from "@aws-sdk/client-ses";
+import fs from "fs";
+import path from "path";
+import mustache from "mustache";
 require("dotenv").config();
 
 const ses = new SESClient({ region: "us-east-1" });
 
-// AWARE HTML TIDAK TERBACA
-
 const messageResponse = (token: string): string => {
-  return `<html>
-<head>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      color: #333;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .message {
-      margin-bottom: 20px;
-    }
-    .token {
-      font-size: 18px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <p class="message">Dear user,</p>
-    <p class="message">Thank you for logging in to our application. Your one-time password is: <span class="token">${token}</span></p>
-    <p class="message">We hope you have a great experience!</p>
-    <p class="message">Best regards,<br/>Tweetify</p>
-  </div>
-</body>
-</html>`;
-};
+  const templatePath =  path.resolve(__dirname, "../static/index.mustache");
+  const templateMessage =  fs.readFileSync(templatePath, "utf-8");
+  const messageToken = token;
+  const html = mustache.render(templateMessage, { token: messageToken });
+  return html;
+}
 
 function createSendEmailCommand(
   toAddress: string,
