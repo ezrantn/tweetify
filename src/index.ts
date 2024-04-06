@@ -1,10 +1,10 @@
 import express from "express";
-import tweetRoutes from "./route/tweet-routes";
 import authRoutes from "./route/auth-routes";
 import { authMiddleware } from "./middleware/auth-middleware";
 import swaggerUI from "swagger-ui-express";
 import swaggerDocument from "../api-spec.json";
 import UserController  from "./controller/user-controller";
+import TweetController from "./controller/tweet-controller";
 
 const app = express();
 const apiPrefix = "/api/v1";
@@ -20,7 +20,7 @@ app.put(`${apiPrefix}/users/:id`, authMiddleware, UserController.updateUserContr
 app.delete(`${apiPrefix}/users/:id`, authMiddleware, UserController.deleteUserController);
 
 
-app.use(`${apiPrefix}/tweets`, authMiddleware, tweetRoutes);
+app.use(`${apiPrefix}/tweets`, authMiddleware, TweetController.createTweetController);
 app.use(`${apiPrefix}/auth`, authRoutes);
 app.use(`${apiPrefix}/docs`, swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
