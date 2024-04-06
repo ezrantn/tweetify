@@ -1,4 +1,4 @@
-interface Tweet {
+export interface Tweet {
   id: number;
   createdAt: Date;
   updatedAt: Date;

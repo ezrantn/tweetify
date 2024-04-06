@@ -3,6 +3,8 @@ require("dotenv").config();
 
 const ses = new SESClient({ region: "us-east-1" });
 
+// AWARE HTML TIDAK TERBACA
+
 const messageResponse = (token: string): string => {
   return `<html>
 <head>
@@ -54,7 +56,7 @@ function createSendEmailCommand(
         Data: "Your one-time password",
       },
       Body: {
-        Text: {
+        Html: {
           Charset: "UTF-8",
           Data: message,
         },

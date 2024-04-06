@@ -3,6 +3,8 @@ import { prismaClient } from "../application/database";
 import { validate } from "../validation/validation";
 import { updateUserSchema, userSchema } from "../validation/user-schema";
 import { ResponseError } from "../error/error";
+import { User } from "../types/user-types";
+import { Tweet } from "../types/tweet-types";
 
 const createUser = async (userData: User): Promise<User> => {
   try {

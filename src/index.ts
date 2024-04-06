@@ -11,28 +11,14 @@ const apiPrefix = "/api/v1";
 
 app.use(express.json());
 
+
 // User Routes
 app.post(`${apiPrefix}/users`, UserController.createUserController);
-app.get(
-  `${apiPrefix}/users/`,
-  authMiddleware,
-  UserController.getAllUsersController
-);
-app.get(
-  `${apiPrefix}/users/:id`,
-  authMiddleware,
-  UserController.getUserByIDController
-);
-app.put(
-  `${apiPrefix}/users/:id`,
-  authMiddleware,
-  UserController.updateUserController
-);
-app.delete(
-  `${apiPrefix}/users/:id`,
-  authMiddleware,
-  UserController.deleteUserController
-);
+app.get(`${apiPrefix}/users/`, authMiddleware, UserController.getAllUsersController);
+app.get(`${apiPrefix}/users/:id`, authMiddleware, UserController.getUserByIDController);
+app.put(`${apiPrefix}/users/:id`, authMiddleware, UserController.updateUserController);
+app.delete(`${apiPrefix}/users/:id`, authMiddleware, UserController.deleteUserController);
+
 
 app.use(`${apiPrefix}/tweets`, authMiddleware, tweetRoutes);
 app.use(`${apiPrefix}/auth`, authRoutes);
