@@ -1,3 +1,4 @@
+import { logger } from "../application/logger";
 import UserService from "../service/user-service";
 import { Request, Response } from "express";
 
@@ -14,7 +15,7 @@ const createUserController = async (
       data: newUser,
     });
   } catch (error) {
-    console.error("Error creating user:", error);
+    logger.error("Error creating user:", error);
     res.status(error.statusCode || 500).json({
       status: false,
       message: error.message || "Failed to create user",
