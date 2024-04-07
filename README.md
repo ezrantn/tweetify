@@ -11,6 +11,7 @@ Explore the API documentation by visiting `localhost:3000/api/v1/docs`.
 - ExpressJS
 - Prisma
 - PostgreSQL
+- Docker
 
 ## Getting Started
 
@@ -36,6 +37,19 @@ Follow these steps to run the project locally:
 
 4. Access the API documentation at `localhost:3000/api/v1/docs`.
 
+## The Docker Way:
+
+1. Run `docker-compose` up to start the Postgres instance:
+
+    ```bash
+    docker-compose up
+    ```
+
+2. Don't forget to migrate the schemas:
+
+    ```bash
+    npx prisma migrate dev
+    ```
 
 ## Support or Feedback
 
