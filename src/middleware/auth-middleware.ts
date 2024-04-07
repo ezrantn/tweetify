@@ -6,7 +6,7 @@ import { JWT_SECRET } from "../application/utils";
 
 type AuthRequest = Request & { user?: User };
 
-export async function authMiddleware(
+export default async function authMiddleware(
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -20,7 +20,6 @@ export async function authMiddleware(
       .json({ status: false, message: `Unauthorized: No token provided` });
   }
 
-  // decode the jwt token
   try {
     const payload = (await jwt.verify(jwtToken, JWT_SECRET)) as {
       tokenId: number;
@@ -31,23 +30,19 @@ export async function authMiddleware(
     });
 
     if (!dbToken?.valid || dbToken.expiration < new Date()) {
-      return res
-        .status(401)
-        .json({
-          status: false,
-          message: `Unauthorized: Token is invalid or expired`,
-        });
+      return res.status(401).json({
+        status: false,
+        message: `Unauthorized: Token is invalid or expired`,
+      });
     }
 
     req.user = dbToken.user;
   } catch (error) {
     console.error("Error in authentication middleware:", error);
-    return res
-      .status(401)
-      .json({
-        status: false,
-        message: `Unauthorized: Error in authentication middleware"`,
-      });
+    return res.status(401).json({
+      status: false,
+      message: `Unauthorized: Error in authentication middleware"`,
+    });
   }
   next();
 }
