@@ -2,8 +2,10 @@
 
 Tweetify is a Twitter API clone designed for educational purposes and personal exploration of social media API concepts. It is not affiliated with the official Twitter platform.
 
-## Swagger Documentation
+## Documentation
 Explore the API documentation by visiting `localhost:3000/api/v1/docs`.
+
+To explore my API endpoints and interact with the application, please refer to the [Postman Collection](https://elements.getpostman.com/redirect?entityId=30159941-66bd43d0-3bf5-4c3b-9870-ab2c7147ddda&entityType=collection) provided.
 
 ## Tech Stack
 - TypeScript
