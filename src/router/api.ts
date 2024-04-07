@@ -18,4 +18,4 @@ privateApi.post("/api/v1/tweets", tweetController.createTweetController);
 privateApi.get("/api/v1/tweets", tweetController.getAllTweetsController);
 privateApi.get("/api/v1/tweets/:id", tweetController.getTweetByIdController);
 privateApi.put("/api/v1/tweets/:id", tweetController.updateTweetController);
-privateApi.delete("/api/v1/tweets:id", tweetController.deleteTweetController);
+privateApi.delete("/api/v1/tweets/:id", tweetController.deleteTweetController);
