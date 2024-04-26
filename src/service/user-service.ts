@@ -4,8 +4,8 @@ import { validate } from "../validation/validation";
 import { updateUserSchema, userSchema } from "../validation/user-schema";
 import { ResponseError } from "../error/error";
 import { User } from "../types/user-types";
-import { Tweet } from "../types/tweet-types";
 import { logger } from "../application/logger";
+import {generateFileName, UploadedFile, uploadFileToS3} from "./file-upload-service";
 
 /**
  * Creates a new user.
@@ -60,9 +60,7 @@ const getAllUsers = async (): Promise<User[]> => {
   }
 };
 
-const getUserByID = async (
-  id: string
-): Promise<{ user: User | null }> => {
+const getUserByID = async (id: string): Promise<{ user: User | null }> => {
   try {
     const user = await prismaClient.user.findUnique({
       where: { id: Number(id) },
@@ -122,10 +120,10 @@ const updateUser = async (id: string, newUser: User): Promise<User> => {
 const deleteUser = async (id: string): Promise<void> => {
   try {
     const deletedUser = await prismaClient.user.update({
-      where: { id: Number(id)},
+      where: { id: Number(id) },
       data: {
-        deletedAt: new Date()
-      }
+        deletedAt: new Date(),
+      },
     });
 
     if (!deletedUser) {
@@ -138,4 +136,35 @@ const deleteUser = async (id: string): Promise<void> => {
   }
 };
 
-export default { createUser, getAllUsers, getUserByID, updateUser, deleteUser };
+const uploadAvatar = async (id: string, file: UploadedFile): Promise<string> => {
+  try {
+    const filename = generateFileName();
+    await uploadFileToS3(file, filename);
+
+    const region = process.env.S3_REGION;
+    const bucketname = process.env.S3_BUCKET;
+
+    const s3ObjectUrl = `https://s3.${region}.amazonaws.com/${bucketname}/${filename}`;
+
+    await prismaClient.user.update({
+      where: { id: Number(id) },
+      data: { image:  s3ObjectUrl},
+    });
+    console.log(`Avatar uploaded successfully for user ${id}`);
+
+    return s3ObjectUrl;
+  } catch (error) {
+    logger.error(`Failed to upload avatar user with ID: ${id}`, error);
+    console.log("error dari service", error);
+    throw new ResponseError(500, "Internal Server Error");
+  }
+};
+
+export default {
+  createUser,
+  getAllUsers,
+  getUserByID,
+  updateUser,
+  deleteUser,
+  uploadAvatar,
+};

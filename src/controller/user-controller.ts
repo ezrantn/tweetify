@@ -103,10 +103,36 @@ const deleteUserController = async (
   }
 };
 
+const uploadAvatarController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { file } = req.body;
+    const uploadedFile = file as Express.Multer.File
+
+    const uploadedImageUrl = await UserService.uploadAvatar(id, uploadedFile);
+
+    res.status(200).json({
+      status: true,
+      message: "Avatar uploaded successfully",
+      image_url: uploadedImageUrl
+    });
+  } catch (error) {
+    logger.error("Error upload avatar user:", error);
+    res.status(error.statusCode || 500).json({
+      status: false,
+      message: error.message || "Failed to upload avatar user",
+    });
+  }
+};
+
 export default {
   createUserController,
   getAllUsersController,
   getUserByIDController,
   updateUserController,
   deleteUserController,
+  uploadAvatarController,
 };
