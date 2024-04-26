@@ -12,6 +12,7 @@ privateApi.get("/api/v1/users", userController.getAllUsersController);
 privateApi.get("/api/v1/users/:id", userController.getUserByIDController);
 privateApi.put("/api/v1/users/:id", userController.updateUserController);
 privateApi.delete("/api/v1/users/:id", userController.deleteUserController);
+privateApi.post("/api/v1/upload/:id", userController.uploadAvatarController);
 
 // Tweet Routes
 privateApi.post("/api/v1/tweets", tweetController.createTweetController);
