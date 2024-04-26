@@ -8,7 +8,7 @@ const createTweetSchema = z.object({
 const updateTweetSchema = z.object({
     content: z.string().min(3),
     image: z.string().optional(),
-    userId: z.number(),
+    userId: z.number().optional(),
   });
 
 export { createTweetSchema, updateTweetSchema }
