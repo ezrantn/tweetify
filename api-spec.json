@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "User API",
+    "title": "Twitter Clone API Specification",
     "description": "API Clone for Twitter",
     "version": "1.0.0"
   },
@@ -11,10 +11,97 @@
     }
   ],
   "paths": {
+    "/login": {
+      "post": {
+        "summary": "Authentication login",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@doe.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success login",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth": {
+      "post": {
+        "summary": "Sending OTP to a login user",
+        "tags": [
+          "Authentication"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@doe.com"
+                  },
+                  "emailToken": {
+                    "type": "string",
+                    "example": "65694359"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authToken": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbklkIjoyNX0.hfFqa_NXiGqWSUorNDFq-VXGuHn_fSz_BFfjSi6S5pA"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/users": {
       "post": {
         "summary": "Create a new user",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "requestBody": {
           "required": false,
           "content": {
@@ -41,7 +128,11 @@
                     "example": null
                   }
                 },
-                "required": ["email", "name", "username"]
+                "required": [
+                  "email",
+                  "name",
+                  "username"
+                ]
               }
             }
           }
@@ -94,7 +185,9 @@
       },
       "get": {
         "summary": "Retrieve all users",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "responses": {
           "200": {
             "description": "List of users",
@@ -148,7 +241,9 @@
     "/users/{id}": {
       "get": {
         "summary": "Retrieve a specific user",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -195,7 +290,9 @@
       },
       "put": {
         "summary": "Update a specific user",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -289,7 +386,9 @@
       },
       "delete": {
         "summary": "Delete a specific user",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -302,28 +401,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "User deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "User deleted successfully"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/UserUpdated"
-                    }
-                  }
-                }
-              }
-            }
+          "204": {
+            "description": "User deleted successfully"
           },
           "400": {
             "description": "Failed to delete the user",
@@ -351,7 +430,9 @@
     "/tweets": {
       "post": {
         "summary": "To create tweet",
-        "tags": ["Tweet"],
+        "tags": [
+          "Tweet"
+        ],
         "requestBody": {
           "required": false,
           "content": {
@@ -378,14 +459,18 @@
                     "example": null
                   }
                 },
-                "required": ["email", "name", "username"]
+                "required": [
+                  "email",
+                  "name",
+                  "username"
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "User created successfully",
+            "description": "Tweet created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -397,7 +482,7 @@
                     },
                     "message": {
                       "type": "string",
-                      "example": "User created successfully"
+                      "example": "Tweet created successfully"
                     },
                     "data": {
                       "$ref": "#/components/schemas/User"
@@ -428,52 +513,188 @@
             }
           }
         }
-      }
-    },
-    "get": {
-      "summary": "Retrieve all users",
-      "tags": ["User"],
-      "responses": {
-        "200": {
-          "description": "List of users",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "boolean",
-                    "example": true
-                  },
-                  "message": {
-                    "type": "string",
-                    "example": "Users listed successfully"
-                  },
-                  "data": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/User"
+      },
+      "get": {
+        "summary": "Retrieve all tweets",
+        "tags": [
+          "Tweet"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tweets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success Get All Tweets"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Tweet"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error while fetching tweets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "An error occurred while fetching tweets. Please try again later."
                     }
                   }
                 }
               }
             }
           }
-        },
-        "400": {
-          "description": "Error while fetching users",
+        }
+      }
+    },
+    "/tweets/{id}": {
+      "get": {
+        "summary": "Get Tweet By ID",
+        "tags": [
+          "Tweet"
+        ],
+        "responses": {
+          "200": {
+            "description": "Get tweet by ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success get tweet by ID"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GetTweetByID"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tweets/id": {
+      "put": {
+        "summary": "Update tweet",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the user to update"
+          }
+        ],
+        "tags": [
+          "Tweet"
+        ],
+        "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
                 "properties": {
-                  "status": {
-                    "type": "boolean",
-                    "example": false
-                  },
-                  "message": {
+                  "content": {
                     "type": "string",
-                    "example": "An error occurred while fetching users. Please try again later."
+                    "example": "This is a content!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success Updating Tweet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Success updated tweet"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/TweetUpdated"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a specific tweet",
+        "tags": [
+          "Tweet"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the tweet to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tweet deleted successfully"
+          },
+          "400": {
+            "description": "Failed to delete the tweet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Failed to delete the tweet"
+                    }
                   }
                 }
               }
@@ -643,6 +864,111 @@
           },
           "userId": {
             "type": "integer",
+            "example": 1
+          },
+          "user": {
+            "type": "object",
+            "$ref": "#/components/schemas/GetAllTweets"
+          }
+        }
+      },
+      "GetAllTweets": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "username": {
+            "type": "string",
+            "example": "John"
+          },
+          "image": {
+            "type": "string",
+            "example": null
+          }
+        }
+      },
+      "GetTweetByID": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 2
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-07T11:18:02.654Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-07T11:18:02.654Z"
+          },
+          "content": {
+            "type": "string",
+            "example": "Hello from thunder client"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "impression": {
+            "type": "integer",
+            "example": 0
+          },
+          "userId": {
+            "type": "integer",
+            "example": 1
+          },
+          "user": {
+            "type": "object",
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "TweetUpdated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-03-08T12:31:36.731Z"
+          },
+          "content": {
+            "type": "string",
+            "example": "This is a content!"
+          },
+          "image": {
+            "type": "string",
+            "example": null
+          },
+          "impression": {
+            "type": "number",
+            "example": 200
+          },
+          "userId": {
+            "type": "number",
             "example": 1
           }
         }
