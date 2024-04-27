@@ -600,9 +600,7 @@
             }
           }
         }
-      }
-    },
-    "/tweets/id": {
+      },
       "put": {
         "summary": "Update tweet",
         "parameters": [
@@ -867,7 +865,6 @@
             "example": 1
           },
           "user": {
-            "type": "object",
             "$ref": "#/components/schemas/GetAllTweets"
           }
         }
@@ -928,7 +925,6 @@
             "example": 1
           },
           "user": {
-            "type": "object",
             "$ref": "#/components/schemas/User"
           }
         }
