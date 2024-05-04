@@ -5,6 +5,8 @@ import {updateUserSchema, userSchema} from "../validation/user-schema";
 import {ResponseError} from "../error/error";
 import {User} from "../types/user-types";
 import {logger} from "../application/logger";
+import {bucketName, s3Client} from "./file-upload-service";
+import {DeleteObjectCommand} from "@aws-sdk/client-s3";
 
 /**
  * Creates a new user.
@@ -152,6 +154,43 @@ const uploadAvatar = async (id: string, signedUrl: string): Promise<User> => {
     }
 };
 
+const deleteAvatar = async (id: string): Promise<void> => {
+    try {
+        const avatarUnique = await prismaClient.user.findUnique({
+            where: {
+                id: Number(id)
+            }
+        })
+
+        if (!avatarUnique) {
+            throw new ResponseError(404, "User not found");
+        }
+
+        if (!avatarUnique.image) {
+            throw new ResponseError(404, "Image not found");
+        }
+
+        const deleteParam = {
+            Bucket: bucketName,
+            Key: avatarUnique.image
+        }
+
+        await s3Client.send(new DeleteObjectCommand(deleteParam));
+
+        await prismaClient.user.update({
+            where: {
+                id: Number(id)
+            },
+            data: {
+                image: null
+            }
+        })
+    } catch (error) {
+        logger.error(`Failed to delete image with ID: ${id}`, error);
+        throw new ResponseError(500, "Internal Server Error");
+    }
+}
+
 export default {
     createUser,
     getAllUsers,
@@ -159,4 +198,5 @@ export default {
     updateUser,
     deleteUser,
     uploadAvatar,
+    deleteAvatar
 };

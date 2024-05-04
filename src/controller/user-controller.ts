@@ -1,5 +1,4 @@
 import { logger } from "../application/logger";
-import UserService from "../service/user-service";
 import { Request, Response } from "express";
 import {GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3";
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
@@ -13,7 +12,7 @@ const createUserController = async (
 ): Promise<void> => {
   try {
     const userData = req.body;
-    const newUser = await UserService.createUser(userData);
+    const newUser = await userService.createUser(userData);
     res.status(201).json({
       status: true,
       message: "User created successfully",
@@ -33,7 +32,7 @@ const getAllUsersController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const allUsers = await UserService.getAllUsers();
+    const allUsers = await userService.getAllUsers();
     res.status(200).json({
       status: true,
       message: "Users retrieved successfully",
@@ -54,7 +53,7 @@ const getUserByIDController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const user = await UserService.getUserByID(id);
+    const user = await userService.getUserByID(id);
     res.status(200).json({
       status: true,
       message: "User retrieved successfully",
@@ -76,7 +75,7 @@ const updateUserController = async (
   try {
     const { id } = req.params;
     const userData = req.body;
-    const updatedUser = await UserService.updateUser(id, userData);
+    const updatedUser = await userService.updateUser(id, userData);
     res.status(200).json({
       status: true,
       message: "User updated successfully",
@@ -97,7 +96,7 @@ const deleteUserController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    await UserService.deleteUser(id);
+    await userService.deleteUser(id);
     res.sendStatus(204);
   } catch (error) {
     logger.error("Error deleting user:", error);
@@ -155,6 +154,21 @@ const uploadAvatarController = async (
   }
 };
 
+const deleteAvatarController = async (req: Request, res: Response) => {
+  try {
+   const { id } = req.params;
+
+   await userService.deleteAvatar(id);
+   res.sendStatus(204);
+  } catch (error) {
+    logger.error("Error deleting user:", error);
+    res.status(error.statusCode || 500).json({
+      status: false,
+      message: error.message || "Failed to delete user",
+    });
+  }
+}
+
 export default {
   createUserController,
   getAllUsersController,
@@ -162,4 +176,5 @@ export default {
   updateUserController,
   deleteUserController,
   uploadAvatarController,
+  deleteAvatarController
 };
