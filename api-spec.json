@@ -486,6 +486,48 @@
         }
       }
     },
+    "/users/delete-avatar/{id}": {
+      "delete": {
+        "summary": "Delete an avatar",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the user avatar to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Image deleted successfully"
+          },
+          "400": {
+            "description": "Failed to delete the avatar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Failed to delete the avatar"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tweets": {
       "post": {
         "summary": "To create tweet",
