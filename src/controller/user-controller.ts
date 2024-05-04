@@ -1,6 +1,10 @@
 import { logger } from "../application/logger";
 import UserService from "../service/user-service";
 import { Request, Response } from "express";
+import {bucketName, generateFileName, s3Client} from "../service/file-upload-service";
+import {GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3";
+import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
+import userService from "../service/user-service";
 
 const createUserController = async (
   req: Request,
@@ -66,7 +70,7 @@ const getUserByIDController = async (
 
 const updateUserController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -109,15 +113,35 @@ const uploadAvatarController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { file } = req.body;
-    const uploadedFile = file as Express.Multer.File
+    const file = req.file;
 
-    const uploadedImageUrl = await UserService.uploadAvatar(id, uploadedFile);
+    const fileBuffer = file?.buffer;
+
+    const fileName = generateFileName();
+    const uploadParams = {
+      Bucket: bucketName,
+      Body: fileBuffer,
+      Key: fileName,
+      ContentType: file?.mimetype
+    }
+
+    await s3Client.send(new PutObjectCommand(uploadParams));
+
+    const signedUrl = await getSignedUrl(
+        s3Client,
+        new GetObjectCommand({
+          Bucket: bucketName,
+          Key: fileName
+        }),
+        { expiresIn: 60 }
+    );
+
+    const updatedUser = userService.uploadAvatar(id, signedUrl);
 
     res.status(200).json({
       status: true,
       message: "Avatar uploaded successfully",
-      image_url: uploadedImageUrl
+      data: signedUrl
     });
   } catch (error) {
     logger.error("Error upload avatar user:", error);
