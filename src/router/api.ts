@@ -17,6 +17,7 @@ privateApi.get("/api/v1/users/:id", userController.getUserByIDController);
 privateApi.put("/api/v1/users/:id", userController.updateUserController);
 privateApi.delete("/api/v1/users/:id", userController.deleteUserController);
 privateApi.post("/api/v1/users/upload/:id", upload.single("avatar"), userController.uploadAvatarController);
+privateApi.delete("/api/v1/users/delete-avatar/:id", userController.deleteAvatarController);
 
 // Tweet Routes
 privateApi.post("/api/v1/tweets", tweetController.createTweetController);
