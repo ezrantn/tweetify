@@ -1,10 +1,11 @@
 import { logger } from "../application/logger";
 import UserService from "../service/user-service";
 import { Request, Response } from "express";
-import {bucketName, generateFileName, s3Client} from "../service/file-upload-service";
 import {GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3";
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
 import userService from "../service/user-service";
+import {ResponseError} from "../error/error";
+import {bucketName, generateFileName, s3Client} from "../service/file-upload-service";
 
 const createUserController = async (
   req: Request,
@@ -113,16 +114,18 @@ const uploadAvatarController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const file = req.file;
+    const image = req.file;
 
-    const fileBuffer = file?.buffer;
+    if (!image) {
+      throw new ResponseError(404, "No image uploaded!");
+    }
 
     const fileName = generateFileName();
     const uploadParams = {
       Bucket: bucketName,
-      Body: fileBuffer,
+      Body: image.buffer,
       Key: fileName,
-      ContentType: file?.mimetype
+      ContentType: image.mimetype
     }
 
     await s3Client.send(new PutObjectCommand(uploadParams));
@@ -136,7 +139,7 @@ const uploadAvatarController = async (
         { expiresIn: 60 }
     );
 
-    const updatedUser = userService.uploadAvatar(id, signedUrl);
+    await userService.uploadAvatar(id, signedUrl);
 
     res.status(200).json({
       status: true,

@@ -5,10 +5,6 @@ import {updateUserSchema, userSchema} from "../validation/user-schema";
 import {ResponseError} from "../error/error";
 import {User} from "../types/user-types";
 import {logger} from "../application/logger";
-import {bucketName, generateFileName, s3Client} from "./file-upload-service";
-import {getSignedUrl} from "@aws-sdk/s3-request-presigner"
-import {GetObjectCommand} from "@aws-sdk/client-s3";
-
 
 /**
  * Creates a new user.
@@ -26,7 +22,7 @@ const createUser = async (userData: User): Promise<User> => {
             throw new ResponseError(400, "Bad Request");
         }
 
-        const result = await prismaClient.user.create({
+        return await prismaClient.user.create({
             data: {
                 email,
                 name,
@@ -34,7 +30,6 @@ const createUser = async (userData: User): Promise<User> => {
                 bio: "Hello, I'm new on Twitter",
             },
         });
-        return result;
     } catch (error) {
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -139,25 +134,17 @@ const deleteUser = async (id: string): Promise<void> => {
     }
 };
 
-const uploadAvatar = async (id: string, fileName: string): Promise<User> => {
+const uploadAvatar = async (id: string, signedUrl: string): Promise<User> => {
     try {
-        const command = await getSignedUrl(
-            s3Client,
-            new GetObjectCommand({
-                Bucket: bucketName,
-                Key: fileName
-            }),
-            { expiresIn: 60}
-        )
-
+        const userId = Number(id);
         return await prismaClient.user.update({
             where: {
-                id: Number(id)
+                id: userId
             },
             data: {
-                image: command
+                image: signedUrl
             }
-        });
+        })
     } catch (error) {
         logger.error(`Failed to upload avatar user with ID: ${id}`, error);
         console.log("error dari service", error);
