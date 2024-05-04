@@ -427,6 +427,65 @@
         }
       }
     },
+    "/users/upload/{id}": {
+      "post": {
+        "summary": "Upload the user avatar",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID of the user to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avatar": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Avatar upload successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Avatar upload successfully"
+                    },
+                    "data": {
+                      "type": "string",
+                      "example": "https://tweetify.s3.us-east-1.amazonaws.com/xxx"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tweets": {
       "post": {
         "summary": "To create tweet",
