@@ -161,10 +161,10 @@ const deleteAvatarController = async (req: Request, res: Response) => {
    await userService.deleteAvatar(id);
    res.sendStatus(204);
   } catch (error) {
-    logger.error("Error deleting user:", error);
+    logger.error("Error deleting avatar:", error);
     res.status(error.statusCode || 500).json({
       status: false,
-      message: error.message || "Failed to delete user",
+      message: error.message || "Failed to delete the avatar",
     });
   }
 }
