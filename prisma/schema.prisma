@@ -11,16 +11,16 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime? 
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   email String @unique @db.VarChar(100)
 
   name       String? @db.VarChar(100)
   username   String? @unique
-  image      String? @db.VarChar(100)
+  image      String? @db.VarChar(512)
   bio        String? @db.VarChar(100)
   isVerified Boolean @default(false)
 
@@ -48,9 +48,9 @@ model Token {
 }
 
 model Tweet {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   content    String  @db.VarChar(100)
