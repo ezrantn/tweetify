@@ -6,8 +6,28 @@ services:
     environment:
     - POSTGRES_USER=postgres
     - POSTGRES_PASSWORD=postgres
-    - POSTGRES_DB=twitter_backend
+    - POSTGRES_DB=tweetify
     ports:
       - '5432:5432'
     volumes:
       - ./db-data:/var/lib/postgresql/data
+
+  app:
+    image: node:16-alpine
+    restart: always
+    working_dir: /src
+    volumes:
+      - .:/src
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/tweetify
+    depends_on:
+      - db
+    command: >
+      sh -c "
+        npm install &&
+        npx prisma init &&
+        npx prisma generate &&
+        npx prisma migrate dev 
+      "
+    ports:
+      - "3000:3000"
