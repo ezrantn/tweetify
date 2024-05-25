@@ -47,12 +47,6 @@ Follow these steps to run the project locally:
     docker-compose up
     ```
 
-2. Don't forget to migrate the schemas:
-
-    ```bash
-    npx prisma migrate dev
-    ```
-
 ## Support or Feedback
 
 Your feedback and suggestions are welcome! If you encounter any issues or have ideas for improvements, please open an issue on the [GitHub repository](https://github.com/ezrantn/tweetify).
