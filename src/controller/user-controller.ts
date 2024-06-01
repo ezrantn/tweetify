@@ -116,7 +116,7 @@ const getUserBasedOnUsername = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const username = req.query.name;
+    const username = req.query.username;
 
     if (typeof username !== "string" || !username) {
       res.status(400).json({

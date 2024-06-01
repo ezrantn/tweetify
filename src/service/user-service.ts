@@ -140,9 +140,12 @@ const searchUserBasedOnUsername = async (
   usernameParam: string,
 ): Promise<User> => {
   try {
-    const userName = await prismaClient.user.findUnique({
+    const userName = await prismaClient.user.findMany({
       where: {
-        username: usernameParam,
+        username: {
+          equals: usernameParam,
+          mode: "insensitive",
+        },
       },
       include: { tweets: true },
     });
@@ -152,7 +155,7 @@ const searchUserBasedOnUsername = async (
       throw new ResponseError(404, "User not found!");
     }
 
-    return userName;
+    return userName[0];
   } catch (error) {
     logger.error(`Failed to get a user with username: ${usernameParam}`, error);
     throw new ResponseError(500, "Internal Server Error");

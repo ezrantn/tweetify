@@ -14,6 +14,7 @@ To explore my API endpoints and interact with the application, please refer to t
 - Prisma
 - PostgreSQL
 - Docker
+- AWS
 
 ## Getting Started
 

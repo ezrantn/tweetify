@@ -12,6 +12,7 @@ privateApi.use(authMiddleware);
 // User Routes
 privateApi.post("/api/v1/users", userController.createUserController);
 privateApi.get("/api/v1/users", userController.getAllUsersController);
+privateApi.get("/api/v1/users/result", userController.getUserBasedOnUsername);
 privateApi.get("/api/v1/users/:id", userController.getUserByIDController);
 privateApi.put("/api/v1/users/:id", userController.updateUserController);
 privateApi.delete("/api/v1/users/:id", userController.deleteUserController);
@@ -24,7 +25,6 @@ privateApi.delete(
   "/api/v1/users/delete-avatar/:id",
   userController.deleteAvatarController,
 );
-privateApi.get("/api/v1/users/search", userController.getUserBasedOnUsername);
 
 // Tweet Routes
 privateApi.post("/api/v1/tweets", tweetController.createTweetController);
