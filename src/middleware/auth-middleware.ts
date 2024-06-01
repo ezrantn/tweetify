@@ -9,7 +9,7 @@ type AuthRequest = Request & { user?: User };
 export default async function authMiddleware(
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const authHeader = req.headers["authorization"];
   const jwtToken = authHeader?.split(" ")[1];

@@ -5,5 +5,9 @@ import swaggerDocument from "../../api-spec.json";
 
 export const publicRouter = express.Router();
 publicRouter.post("/api/v1/login", authController.login);
-publicRouter.post("/api/v1/auth", authController.authenticate)
-publicRouter.use("/api/v1/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+publicRouter.post("/api/v1/auth", authController.authenticate);
+publicRouter.use(
+  "/api/v1/docs",
+  swaggerUI.serve,
+  swaggerUI.setup(swaggerDocument),
+);

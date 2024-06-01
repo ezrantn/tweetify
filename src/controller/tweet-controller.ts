@@ -9,7 +9,7 @@ type AuthRequest = Request & { user?: User };
 
 const createTweetController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const tweetData: Tweet = req.body;
@@ -22,7 +22,7 @@ const createTweetController = async (
 
     const createdTweet = await TweetService.createTweet(
       tweetData,
-      userId.toString()
+      userId.toString(),
     );
 
     res.status(201).json({
@@ -41,16 +41,16 @@ const createTweetController = async (
 
 const getAllTweetsController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const allTweets = await TweetService.getAllTweets();
 
     if (!allTweets) {
       logger.error("No tweets found!");
-      throw new ResponseError(404, "Tweets not found")
+      throw new ResponseError(404, "Tweets not found");
     }
-    
+
     res.status(200).json({
       status: true,
       message: "Success Get All Tweets",
@@ -65,7 +65,10 @@ const getAllTweetsController = async (
   }
 };
 
-const getTweetByIdController = async (req: Request, res: Response): Promise<void> => {
+const getTweetByIdController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { id } = req.params;
     const tweetId = await TweetService.getTweetByID(id);
@@ -83,7 +86,10 @@ const getTweetByIdController = async (req: Request, res: Response): Promise<void
   }
 };
 
-const updateTweetController = async (req: Request, res: Response): Promise<void> => {
+const updateTweetController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
     const { id } = req.params;
     const tweetData = req.body;
@@ -91,8 +97,8 @@ const updateTweetController = async (req: Request, res: Response): Promise<void>
     res.status(200).json({
       status: true,
       message: "Success Update Tweet",
-      data: updatedTweet
-    })
+      data: updatedTweet,
+    });
   } catch (error) {
     logger.error("Error updating tweet:", error);
     res.status(error.statusCode || 500).json({
@@ -100,12 +106,15 @@ const updateTweetController = async (req: Request, res: Response): Promise<void>
       message: error.message || "Failed to update tweet",
     });
   }
-} 
+};
 
-const deleteTweetController = async (req: Request, res: Response): Promise<void> => {
+const deleteTweetController = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
   try {
-    const  { id } = req.params;
-    await  TweetService.deleteTweet(id);
+    const { id } = req.params;
+    await TweetService.deleteTweet(id);
     res.sendStatus(204);
   } catch (error) {
     logger.error("Error deleting tweet:", error);
@@ -114,6 +123,12 @@ const deleteTweetController = async (req: Request, res: Response): Promise<void>
       message: error.message || "Failed to delete tweet",
     });
   }
-}
+};
 
-export default { createTweetController, getAllTweetsController, getTweetByIdController, updateTweetController, deleteTweetController };
+export default {
+  createTweetController,
+  getAllTweetsController,
+  getTweetByIdController,
+  updateTweetController,
+  deleteTweetController,
+};

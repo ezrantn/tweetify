@@ -15,7 +15,7 @@ export const AuthenticationService = {
     validate(emailSchema, { email });
     const emailToken = generateEmailToken();
     const expiration = new Date(
-      new Date().getTime() + EMAIL_TOKEN_EXPIRATION_MINUTES * 60 * 1000
+      new Date().getTime() + EMAIL_TOKEN_EXPIRATION_MINUTES * 60 * 1000,
     );
     try {
       await prismaClient.token.create({
@@ -64,7 +64,7 @@ export const AuthenticationService = {
     }
 
     const expiration = new Date(
-      new Date().getTime() + AUTHENTICATION_EXPIRATION_HOURS * 60 * 60 * 1000
+      new Date().getTime() + AUTHENTICATION_EXPIRATION_HOURS * 60 * 60 * 1000,
     );
 
     const apiToken = await prismaClient.token.create({

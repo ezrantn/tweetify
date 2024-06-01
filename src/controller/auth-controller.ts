@@ -19,7 +19,7 @@ const AuthController = {
       const { email, emailToken } = req.body;
       const authToken = await AuthenticationService.authenticate(
         email,
-        emailToken
+        emailToken,
       );
       res.json({ authToken });
     } catch (error) {

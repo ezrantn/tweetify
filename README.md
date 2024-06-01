@@ -39,13 +39,29 @@ Follow these steps to run the project locally:
 
 4. Access the API documentation at `localhost:3000/api/v1/docs`.
 
-## The Docker Way:
+The Docker Way:
 
 1. Run `docker-compose` up to start the Postgres instance:
 
     ```bash
     docker-compose up
     ```
+
+2. Launch the project in development mode:
+
+   ```bash
+   npm run dev
+   ```
+   
+3. Access the API documentation at `localhost:3000/api/v1/docs`.
+
+4. Verify your database connection. The connection string is provided via the `DATABASE_URL` environment variable in the `docker-compose.yml` file.
+
+5. When you are done, you can stop the services by pressing Ctrl+C or:
+
+   ```bash
+   docker-compose down
+   ```
 
 ## Support or Feedback
 

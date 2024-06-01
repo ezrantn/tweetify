@@ -1,14 +1,18 @@
 import { logger } from "../application/logger";
 import { Request, Response } from "express";
-import {GetObjectCommand, PutObjectCommand} from "@aws-sdk/client-s3";
-import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import userService from "../service/user-service";
-import {ResponseError} from "../error/error";
-import {bucketName, generateFileName, s3Client} from "../service/file-upload-service";
+import { ResponseError } from "../error/error";
+import {
+  bucketName,
+  generateFileName,
+  s3Client,
+} from "../service/file-upload-service";
 
 const createUserController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const userData = req.body;
@@ -29,7 +33,7 @@ const createUserController = async (
 
 const getAllUsersController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const allUsers = await userService.getAllUsers();
@@ -49,7 +53,7 @@ const getAllUsersController = async (
 
 const getUserByIDController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -92,7 +96,7 @@ const updateUserController = async (
 
 const deleteUserController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -103,6 +107,37 @@ const deleteUserController = async (
     res.status(error.statusCode || 500).json({
       status: false,
       message: error.message || "Failed to delete user",
+    });
+  }
+};
+
+const getUserBasedOnUsername = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const username = req.query.name;
+
+    if (typeof username !== "string" || !username) {
+      res.status(400).json({
+        status: false,
+        message: "Bad request",
+      });
+      return;
+    }
+
+    const user = await userService.searchUserBasedOnUsername(username);
+
+    res.status(200).json({
+      status: true,
+      message: "User found",
+      data: user,
+    });
+  } catch (error) {
+    logger.error("Error getting the username:", error);
+    res.status(error.statusCode || 500).json({
+      status: false,
+      message: error.message || "bad request",
     });
   }
 };
@@ -124,18 +159,18 @@ const uploadAvatarController = async (
       Bucket: bucketName,
       Body: image.buffer,
       Key: fileName,
-      ContentType: image.mimetype
-    }
+      ContentType: image.mimetype,
+    };
 
     await s3Client.send(new PutObjectCommand(uploadParams));
 
     const signedUrl = await getSignedUrl(
-        s3Client,
-        new GetObjectCommand({
-          Bucket: bucketName,
-          Key: fileName
-        }),
-        { expiresIn: 60 }
+      s3Client,
+      new GetObjectCommand({
+        Bucket: bucketName,
+        Key: fileName,
+      }),
+      { expiresIn: 60 },
     );
 
     await userService.uploadAvatar(id, signedUrl);
@@ -143,7 +178,7 @@ const uploadAvatarController = async (
     res.status(201).json({
       status: true,
       message: "Avatar uploaded successfully",
-      data: signedUrl
+      data: signedUrl,
     });
   } catch (error) {
     logger.error("Error upload avatar user:", error);
@@ -156,10 +191,10 @@ const uploadAvatarController = async (
 
 const deleteAvatarController = async (req: Request, res: Response) => {
   try {
-   const { id } = req.params;
+    const { id } = req.params;
 
-   await userService.deleteAvatar(id);
-   res.sendStatus(204);
+    await userService.deleteAvatar(id);
+    res.sendStatus(204);
   } catch (error) {
     logger.error("Error deleting avatar:", error);
     res.status(error.statusCode || 500).json({
@@ -167,7 +202,7 @@ const deleteAvatarController = async (req: Request, res: Response) => {
       message: error.message || "Failed to delete the avatar",
     });
   }
-}
+};
 
 export default {
   createUserController,
@@ -176,5 +211,6 @@ export default {
   updateUserController,
   deleteUserController,
   uploadAvatarController,
-  deleteAvatarController
+  deleteAvatarController,
+  getUserBasedOnUsername,
 };

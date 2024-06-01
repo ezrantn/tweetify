@@ -11,7 +11,7 @@ import { Prisma } from "@prisma/client";
 
 const createTweet = async (
   tweetData: Tweet,
-  userId: string
+  userId: string,
 ): Promise<Tweet> => {
   try {
     const { content, image } = validate(createTweetSchema, tweetData);
@@ -113,8 +113,8 @@ const deleteTweet = async (id: string): Promise<void> => {
     const deletedTweet = await prismaClient.tweet.update({
       where: { id: Number(id) },
       data: {
-        deletedAt: new Date()
-      }
+        deletedAt: new Date(),
+      },
     });
 
     if (!deletedTweet) {

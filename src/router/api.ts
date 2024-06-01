@@ -5,10 +5,9 @@ import tweetController from "../controller/tweet-controller";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
-const upload = multer({storage: storage});
-export const privateApi =  express.Router();
+const upload = multer({ storage: storage });
+export const privateApi = express.Router();
 privateApi.use(authMiddleware);
-
 
 // User Routes
 privateApi.post("/api/v1/users", userController.createUserController);
@@ -16,8 +15,16 @@ privateApi.get("/api/v1/users", userController.getAllUsersController);
 privateApi.get("/api/v1/users/:id", userController.getUserByIDController);
 privateApi.put("/api/v1/users/:id", userController.updateUserController);
 privateApi.delete("/api/v1/users/:id", userController.deleteUserController);
-privateApi.post("/api/v1/users/upload/:id", upload.single("avatar"), userController.uploadAvatarController);
-privateApi.delete("/api/v1/users/delete-avatar/:id", userController.deleteAvatarController);
+privateApi.post(
+  "/api/v1/users/upload/:id",
+  upload.single("avatar"),
+  userController.uploadAvatarController,
+);
+privateApi.delete(
+  "/api/v1/users/delete-avatar/:id",
+  userController.deleteAvatarController,
+);
+privateApi.get("/api/v1/users/search", userController.getUserBasedOnUsername);
 
 // Tweet Routes
 privateApi.post("/api/v1/tweets", tweetController.createTweetController);

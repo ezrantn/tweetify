@@ -1,0 +1,4 @@
+db-data
+dist
+node_modules
+prisma/migrations
