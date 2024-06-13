@@ -1,216 +1,198 @@
 import { logger } from "../application/logger";
 import { Request, Response } from "express";
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import userService from "../service/user-service";
-import { ResponseError } from "../error/error";
 import {
-  bucketName,
-  generateFileName,
-  s3Client,
-} from "../service/file-upload-service";
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { ResponseError } from "../error/error";
+import UserService from "../service/user-service";
+import FileUploadService from "../service/file-upload-service";
 
-const createUserController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const userData = req.body;
-    const newUser = await userService.createUser(userData);
-    res.status(201).json({
-      status: true,
-      message: "User created successfully",
-      data: newUser,
-    });
-  } catch (error) {
-    logger.error("Error creating user:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to create user",
-    });
+class UserController {
+  private userService: UserService;
+  private s3Client: S3Client;
+  private fileUploadService: FileUploadService;
+
+  constructor() {
+    this.userService = new UserService();
+    this.s3Client = new S3Client();
+    this.fileUploadService = new FileUploadService();
   }
-};
 
-const getAllUsersController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const allUsers = await userService.getAllUsers();
-    res.status(200).json({
-      status: true,
-      message: "Users retrieved successfully",
-      data: allUsers,
-    });
-  } catch (error) {
-    logger.error("Error retrieving users:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to retrieve users",
-    });
-  }
-};
-
-const getUserByIDController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const user = await userService.getUserByID(id);
-    res.status(200).json({
-      status: true,
-      message: "User retrieved successfully",
-      data: user,
-    });
-  } catch (error) {
-    logger.error("Error retrieving user:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to retrieve user",
-    });
-  }
-};
-
-const updateUserController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const userData = req.body;
-    const updatedUser = await userService.updateUser(id, userData);
-    res.status(200).json({
-      status: true,
-      message: "User updated successfully",
-      data: updatedUser,
-    });
-  } catch (error) {
-    logger.error("Error updating user:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to update user",
-    });
-  }
-};
-
-const deleteUserController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-    await userService.deleteUser(id);
-    res.sendStatus(204);
-  } catch (error) {
-    logger.error("Error deleting user:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to delete user",
-    });
-  }
-};
-
-const getUserBasedOnUsername = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const username = req.query.username;
-
-    if (typeof username !== "string" || !username) {
-      res.status(400).json({
-        status: false,
-        message: "Bad request",
+  async createNewUser(req: Request, res: Response): Promise<void> {
+    try {
+      const userData = req.body;
+      const newUser = await this.userService.createUser(userData);
+      res.status(201).json({
+        status: true,
+        message: "User created successfully",
+        data: newUser,
       });
-      return;
+    } catch (error) {
+      logger.error("Error creating user:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to create user",
+      });
     }
-
-    const user = await userService.searchUserBasedOnUsername(username);
-
-    res.status(200).json({
-      status: true,
-      message: "User found",
-      data: user,
-    });
-  } catch (error) {
-    logger.error("Error getting the username:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "bad request",
-    });
   }
-};
 
-const uploadAvatarController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const image = req.file;
-
-    if (!image) {
-      throw new ResponseError(404, "No image uploaded!");
+  async getAllUsersController(req: Request, res: Response): Promise<void> {
+    try {
+      const allUsers = await this.userService.getAllUsers();
+      res.status(200).json({
+        status: true,
+        message: "Users retrieved successfully",
+        data: allUsers,
+      });
+    } catch (error) {
+      logger.error("Error retrieving users:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to retrieve users",
+      });
     }
+  }
 
-    const fileName = generateFileName();
-    const uploadParams = {
-      Bucket: bucketName,
-      Body: image.buffer,
-      Key: fileName,
-      ContentType: image.mimetype,
-    };
+  async getUserByIDController(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const user = await this.userService.getUserByID(id);
+      res.status(200).json({
+        status: true,
+        message: "User retrieved successfully",
+        data: user,
+      });
+    } catch (error) {
+      logger.error("Error retrieving user:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to retrieve user",
+      });
+    }
+  }
 
-    await s3Client.send(new PutObjectCommand(uploadParams));
+  async updateUserController(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const userData = req.body;
+      const updatedUser = await this.userService.updateUser(id, userData);
+      res.status(200).json({
+        status: true,
+        message: "User updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      logger.error("Error updating user:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to update user",
+      });
+    }
+  }
 
-    const signedUrl = await getSignedUrl(
-      s3Client,
-      new GetObjectCommand({
-        Bucket: bucketName,
+  async deleteUserController(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      await this.userService.deleteUser(id);
+      res.sendStatus(204);
+    } catch (error) {
+      logger.error("Error deleting user:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to delete user",
+      });
+    }
+  }
+
+  async getUserBasedOnUsername(req: Request, res: Response): Promise<void> {
+    try {
+      const username = req.query.username;
+
+      if (typeof username !== "string" || !username) {
+        res.status(400).json({
+          status: false,
+          message: "Bad request",
+        });
+        return;
+      }
+
+      const user = await this.userService.searchUserBasedOnUsername(username);
+
+      res.status(200).json({
+        status: true,
+        message: "User found",
+        data: user,
+      });
+    } catch (error) {
+      logger.error("Error getting the username:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "bad request",
+      });
+    }
+  }
+
+  async uploadAvatarController(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const image = req.file;
+
+      if (!image) {
+        throw new ResponseError(404, "No image uploaded!");
+      }
+
+      const fileName = this.fileUploadService.generateFileName();
+      const uploadParams = {
+        Bucket: this.fileUploadService.getBucketName(),
+        Body: image.buffer,
         Key: fileName,
-      }),
-      { expiresIn: 60 },
-    );
+        ContentType: image.mimetype,
+      };
 
-    await userService.uploadAvatar(id, signedUrl);
+      await this.s3Client.send(new PutObjectCommand(uploadParams));
 
-    res.status(201).json({
-      status: true,
-      message: "Avatar uploaded successfully",
-      data: signedUrl,
-    });
-  } catch (error) {
-    logger.error("Error upload avatar user:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to upload avatar user",
-    });
+      const signedUrl = await getSignedUrl(
+        this.s3Client,
+        new GetObjectCommand({
+          Bucket: this.fileUploadService.getBucketName(),
+          Key: fileName,
+        }),
+        { expiresIn: 60 },
+      );
+
+      await this.userService.uploadAvatar(id, signedUrl);
+
+      res.status(201).json({
+        status: true,
+        message: "Avatar uploaded successfully",
+        data: signedUrl,
+      });
+    } catch (error) {
+      logger.error("Error upload avatar user:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to upload avatar user",
+      });
+    }
   }
-};
 
-const deleteAvatarController = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
+  async deleteAvatarController(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
 
-    await userService.deleteAvatar(id);
-    res.sendStatus(204);
-  } catch (error) {
-    logger.error("Error deleting avatar:", error);
-    res.status(error.statusCode || 500).json({
-      status: false,
-      message: error.message || "Failed to delete the avatar",
-    });
+      await this.userService.deleteAvatar(id);
+      res.sendStatus(204);
+    } catch (error) {
+      logger.error("Error deleting avatar:", error);
+      res.status(error.statusCode || 500).json({
+        status: false,
+        message: error.message || "Failed to delete the avatar",
+      });
+    }
   }
-};
+}
 
-export default {
-  createUserController,
-  getAllUsersController,
-  getUserByIDController,
-  updateUserController,
-  deleteUserController,
-  uploadAvatarController,
-  deleteAvatarController,
-  getUserBasedOnUsername,
-};
+export default UserController;

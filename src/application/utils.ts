@@ -1,28 +1,39 @@
 import jwt from "jsonwebtoken";
 import { Router } from "express";
 
-const router = Router();
-const EMAIL_TOKEN_EXPIRATION_MINUTES = 10;
-const AUTHENTICATION_EXPIRATION_HOURS = 12;
-const JWT_SECRET = process.env.JWT_SECRET || "SUPER SECRET";
+class Helper {
+  private router = Router();
+  private EMAIL_TOKEN_EXPIRATION_MINUTES = 10;
+  private AUTHENTICATION_EXPIRATION_HOURS = 12;
+  private JWT_SECRET = process.env.JWT_SECRET || "SUPER SECRET";
 
-function generateEmailToken(): string {
-  return Math.floor(10000000 + Math.random() * 90000000).toString();
+  getRouter(): Router {
+    return this.router;
+  }
+
+  getEmailTokenExpirationMinutes(): number {
+    return this.EMAIL_TOKEN_EXPIRATION_MINUTES;
+  }
+
+  getAuthenticationExpirationHours(): number {
+    return this.AUTHENTICATION_EXPIRATION_HOURS;
+  }
+
+  getJWTSecret(): string {
+    return this.JWT_SECRET;
+  }
+
+  generateEmailToken(): string {
+    return Math.floor(10000000 + Math.random() * 90000000).toString();
+  }
+
+  generateAuthToken(tokenId: number): string {
+    const jwtPayload = { tokenId };
+    return jwt.sign(jwtPayload, this.JWT_SECRET, {
+      algorithm: "HS256",
+      noTimestamp: true,
+    });
+  }
 }
 
-function generateAuthToken(tokenId: number): string {
-  const jwtPayload = { tokenId };
-  return jwt.sign(jwtPayload, JWT_SECRET, {
-    algorithm: "HS256",
-    noTimestamp: true,
-  });
-}
-
-export {
-  router,
-  EMAIL_TOKEN_EXPIRATION_MINUTES,
-  AUTHENTICATION_EXPIRATION_HOURS,
-  JWT_SECRET,
-  generateAuthToken,
-  generateEmailToken,
-};
+export default Helper;

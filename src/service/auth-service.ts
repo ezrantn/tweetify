@@ -1,24 +1,32 @@
-import { sendEmailToken } from "./email-service";
-import { prismaClient } from "../application/database";
-import { generateAuthToken, generateEmailToken } from "../application/utils";
-import {
-  EMAIL_TOKEN_EXPIRATION_MINUTES,
-  AUTHENTICATION_EXPIRATION_HOURS,
-} from "../application/utils";
+import EmailService from "./email-service";
+import Helper from "../application/utils";
 import { validate } from "../validation/validation";
 import { authSchema, emailSchema } from "../validation/auth-schema";
 import { logger } from "../application/logger";
 import { ResponseError } from "../error/error";
+import { PrismaClient } from "@prisma/client";
 
-export const AuthenticationService = {
-  login: async (email: string) => {
+class AuthenticationService {
+  private emailService: EmailService;
+  private prismaClient: PrismaClient;
+  private helper: Helper;
+
+  constructor() {
+    this.emailService = new EmailService();
+    this.helper = new Helper();
+    this.prismaClient = new PrismaClient();
+  }
+
+  async login(email: string) {
     validate(emailSchema, { email });
-    const emailToken = generateEmailToken();
+
+    const emailToken = this.helper.generateEmailToken();
     const expiration = new Date(
-      new Date().getTime() + EMAIL_TOKEN_EXPIRATION_MINUTES * 60 * 1000,
+      Date.now() + this.helper.getEmailTokenExpirationMinutes() * 60 * 1000,
     );
+
     try {
-      await prismaClient.token.create({
+      await this.prismaClient.token.create({
         data: {
           type: "EMAIL",
           emailToken,
@@ -32,23 +40,20 @@ export const AuthenticationService = {
         },
       });
 
-      await sendEmailToken(email, emailToken);
+      await this.emailService.sendEmailToken(email, emailToken);
       return true;
     } catch (error) {
       logger.error("Failed to create token:", error);
       throw new ResponseError(500, "Failed to create token");
     }
-  },
+  }
 
-  authenticate: async (email: string, emailToken: string) => {
+  async authenticate(email: string, emailToken: string) {
     validate(authSchema, { email, emailToken });
-    const dbEmailToken = await prismaClient.token.findUnique({
-      where: {
-        emailToken,
-      },
-      include: {
-        user: true,
-      },
+
+    const dbEmailToken = await this.prismaClient.token.findUnique({
+      where: { emailToken },
+      include: { user: true },
     });
 
     if (!dbEmailToken || !dbEmailToken.valid) {
@@ -64,26 +69,25 @@ export const AuthenticationService = {
     }
 
     const expiration = new Date(
-      new Date().getTime() + AUTHENTICATION_EXPIRATION_HOURS * 60 * 60 * 1000,
+      Date.now() +
+        this.helper.getAuthenticationExpirationHours() * 60 * 60 * 1000,
     );
 
-    const apiToken = await prismaClient.token.create({
+    const apiToken = await this.prismaClient.token.create({
       data: {
         type: "API",
         expiration,
-        user: {
-          connect: {
-            email,
-          },
-        },
+        user: { connect: { email } },
       },
     });
 
-    await prismaClient.token.update({
+    await this.prismaClient.token.update({
       where: { id: dbEmailToken.id },
       data: { valid: false },
     });
 
-    return generateAuthToken(apiToken.id);
-  },
-};
+    return this.helper.generateAuthToken(apiToken.id);
+  }
+}
+
+export default AuthenticationService;
