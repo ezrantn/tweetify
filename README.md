@@ -38,7 +38,13 @@ Follow these steps to run the project locally:
     npm run dev
     ```
 
-4. Access the API documentation at `localhost:3000/api/v1/docs`.
+4. Run the migration by:
+   
+   ```bash
+   npx prisma migrate
+   ```
+
+5. Access the API documentation at `localhost:3000/api/v1/docs`.
 
 The Docker Way:
 
