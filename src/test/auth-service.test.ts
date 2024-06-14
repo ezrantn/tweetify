@@ -1,8 +1,5 @@
 import { prismaClient } from "../application/database";
-import { generateEmailToken } from "../application/utils";
 import { ResponseError } from "../error/error";
-import { AuthenticationService } from "../service/auth-service";
-import { sendEmailToken } from "../service/email-service";
 
 jest.mock("../service/email-service");
 jest.mock("../application/utils");

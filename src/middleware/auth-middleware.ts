@@ -1,16 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { User } from "@prisma/client";
-import { prismaClient } from "../application/database";
+import { PrismaClient, User } from "@prisma/client";
 import Helper from "../application/utils";
 
 type AuthRequest = Request & { user?: User };
 
 class AuthMiddleware {
   private helper: Helper;
+  private prismaClient: PrismaClient;
 
   constructor() {
     this.helper = new Helper();
+    this.prismaClient = new PrismaClient();
   }
 
   async authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
@@ -30,7 +31,7 @@ class AuthMiddleware {
       )) as {
         tokenId: number;
       };
-      const dbToken = await prismaClient.token.findUnique({
+      const dbToken = await this.prismaClient.token.findUnique({
         where: { id: payload.tokenId },
         include: { user: true },
       });
