@@ -7,6 +7,7 @@ import { Tweet } from "../types/tweet-types";
 import { ResponseError } from "../error/error";
 import { logger } from "../application/logger";
 import { Prisma, PrismaClient } from "@prisma/client";
+import { prismaClient } from "../application/database";
 
 /**
  * Creates a new tweet.
@@ -16,12 +17,6 @@ import { Prisma, PrismaClient } from "@prisma/client";
  */
 
 class TweetService {
-  private prismaClient: PrismaClient;
-
-  constructor() {
-    this.prismaClient = new PrismaClient();
-  }
-
   async createTweet(tweetData: Tweet, userId: string): Promise<Tweet> {
     try {
       const { content, image } = validate(createTweetSchema, tweetData);
@@ -31,14 +26,13 @@ class TweetService {
         throw new ResponseError(404, "Not Found");
       }
 
-      const result = await this.prismaClient.tweet.create({
+      return await prismaClient.tweet.create({
         data: {
           content,
           image,
           userId: Number(userId),
         },
       });
-      return result;
     } catch (error) {
       logger.error("Create tweet error", error);
       throw new ResponseError(500, "Internal Server Error");
@@ -47,7 +41,7 @@ class TweetService {
 
   async getAllTweets(): Promise<Tweet[]> {
     try {
-      const allTweets = await this.prismaClient.tweet.findMany({
+      const allTweets = await prismaClient.tweet.findMany({
         include: {
           user: {
             select: {
@@ -73,7 +67,7 @@ class TweetService {
 
   async getTweetByID(id: string): Promise<Tweet> {
     try {
-      const result = await this.prismaClient.tweet.findUnique({
+      const result = await prismaClient.tweet.findUnique({
         where: { id: Number(id) },
         include: { user: true },
       });
@@ -91,7 +85,7 @@ class TweetService {
   async updateTweet(id: string, newData: Tweet): Promise<Tweet> {
     try {
       const { content, image, userId } = validate(updateTweetSchema, newData);
-      const result = await this.prismaClient.tweet.update({
+      const result = await prismaClient.tweet.update({
         where: { id: Number(id) },
         data: {
           content,
@@ -120,7 +114,7 @@ class TweetService {
 
   async deleteTweet(id: string): Promise<void> {
     try {
-      const deletedTweet = await this.prismaClient.tweet.update({
+      const deletedTweet = await prismaClient.tweet.update({
         where: { id: Number(id) },
         data: {
           deletedAt: new Date(),

@@ -4,17 +4,15 @@ import { validate } from "../validation/validation";
 import { authSchema, emailSchema } from "../validation/auth-schema";
 import { logger } from "../application/logger";
 import { ResponseError } from "../error/error";
-import { PrismaClient } from "@prisma/client";
+import { prismaClient } from "../application/database";
 
 class AuthenticationService {
   private emailService: EmailService;
-  private prismaClient: PrismaClient;
   private helper: Helper;
 
   constructor() {
     this.emailService = new EmailService();
     this.helper = new Helper();
-    this.prismaClient = new PrismaClient();
   }
 
   async login(email: string) {
@@ -26,7 +24,7 @@ class AuthenticationService {
     );
 
     try {
-      await this.prismaClient.token.create({
+      await prismaClient.token.create({
         data: {
           type: "EMAIL",
           emailToken,
@@ -51,7 +49,7 @@ class AuthenticationService {
   async authenticate(email: string, emailToken: string) {
     validate(authSchema, { email, emailToken });
 
-    const dbEmailToken = await this.prismaClient.token.findUnique({
+    const dbEmailToken = await prismaClient.token.findUnique({
       where: { emailToken },
       include: { user: true },
     });
@@ -73,7 +71,7 @@ class AuthenticationService {
         this.helper.getAuthenticationExpirationHours() * 60 * 60 * 1000,
     );
 
-    const apiToken = await this.prismaClient.token.create({
+    const apiToken = await prismaClient.token.create({
       data: {
         type: "API",
         expiration,
@@ -81,7 +79,7 @@ class AuthenticationService {
       },
     });
 
-    await this.prismaClient.token.update({
+    await prismaClient.token.update({
       where: { id: dbEmailToken.id },
       data: { valid: false },
     });

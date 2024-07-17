@@ -1,70 +1,86 @@
-import { prismaClient } from "../application/database";
+import AuthenticationService from "../service/auth-service";
 import { ResponseError } from "../error/error";
+import { test, describe, vi } from "vitest";
 
-jest.mock("../service/email-service");
-jest.mock("../application/utils");
-jest.mock("../validation/validation");
-jest.mock("../validation/auth-schema");
-jest.mock("../application/logger");
-jest.mock("../error/error");
+vi.mock("../service/email-service.ts");
+vi.mock("../application/utils.ts");
+vi.mock("../application/database.ts");
 
-jest.mock("../application/database", () => ({
-  prismaClient: {
-    token: {
-      create: jest.fn().mockResolvedValue({
-        id: 1,
-        type: "EMAIL",
-        emailToken: "12345",
-        expiration: new Date(new Date().getTime() + 30 * 60 * 1000),
-        user: { email: "user@example.com" },
-      }),
-    },
-  },
-}));
+test("AuthenticationService", () => {
+  describe("login service", () => {
+    it("should return true when valid email is provided and token is successfully created and sent", async () => {
+      const authService = new AuthenticationService();
+      const email = "valid@example.com";
 
-describe("Authentication Service", () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    setupMocks();
-  });
+      vi.spyOn(authService["helper"], "generateEmailToken").mockReturnValue(
+        "12345678",
+      );
+      vi.spyOn(
+        authService["helper"],
+        "getEmailTokenExpirationMinutes",
+      ).mockReturnValue(10);
+      vi.spyOn(authService["prismaClient"].token, "create").mockResolvedValue(
+        {},
+      );
+      vi.spyOn(
+        authService["emailService"],
+        "sendEmailToken",
+      ).mockResolvedValue();
 
-  const setupMocks = () => {
-    generateEmailToken.mockReturnValue("12345");
-    sendEmailToken.mockResolvedValue(true);
-  };
+      const result = await authService.login(email);
 
-  it("login should create an email token and send it to the user", async () => {
-    const email = "user@example.com";
-    await AuthenticationService.login(email);
-
-    expect(prismaClient.token.create).toHaveBeenCalledTimes(1);
-    expect(prismaClient.token.create).toHaveBeenCalledWith({
-      data: {
-        type: "EMAIL",
-        emailToken: "12345",
-        expiration: expect.any(Date),
-        user: {
-          connectOrCreate: {
-            where: { email },
-            create: { email },
-          },
-        },
-      },
+      expect(result).toBe(true);
     });
 
-    expect(sendEmailToken).toHaveBeenCalledTimes(1);
-    expect(sendEmailToken).toHaveBeenCalledWith(email, "12345");
+    it("should throw ResponseError when email is invalid", async () => {
+      const authService = new AuthenticationService();
+      const email = "invalid-email";
+
+      await expect(authService.login(email)).rejects.toThrow(ResponseError);
+    });
   });
 
-  it("login should throw an error if token creation fails", async () => {
-    const email = "user@example.com";
+  describe("authentication service", () => {
+    it("should return auth token when email and emailToken are valid", async () => {
+      const authService = new AuthenticationService();
+      const email = "example@example.com";
+      const emailToken = "123456";
 
-    prismaClient.token.create.mockRejectedValue(
-      new Error("token creation failed"),
-    );
+      vi.spyOn(authService.prismaClient.token, "findUnique").mockResolvedValue({
+        emailToken,
+        valid: true,
+        expiration: new Date(Date.now() + 10000),
+        user: { email },
+      });
 
-    await expect(AuthenticationService.login(email)).rejects.toThrow(
-      new ResponseError(500, "Failed to create token"),
-    );
+      vi.spyOn(authService.prismaClient.token, "create").mockResolvedValue({
+        id: 1,
+      });
+      vi.spyOn(authService.prismaClient.token, "update").mockResolvedValue({});
+      vi.spyOn(authService.helper, "generateAuthToken").mockReturnValue(
+        "auth-token",
+      );
+
+      const authToken = await authService.authenticate(email, emailToken);
+
+      expect(authToken).toBe("auth-token");
+    });
+
+    it("should throw 400 ResponseError when email token is invalid", async () => {
+      const authService = new AuthenticationService();
+      const email = "example@example.com";
+      const emailToken = "invalid-token";
+
+      vi.spyOn(authService.prismaClient.token, "findUnique").mockResolvedValue(
+        null,
+      );
+
+      await expect(authService.authenticate(email, emailToken)).rejects.toThrow(
+        ResponseError,
+      );
+      await expect(authService.authenticate(email, emailToken)).rejects.toThrow(
+        "Invalid email token",
+      );
+    });
   });
 });

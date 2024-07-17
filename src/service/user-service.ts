@@ -6,6 +6,7 @@ import { User } from "../types/user-types";
 import { logger } from "../application/logger";
 import FileUploadService from "./file-upload-service";
 import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { prismaClient } from "../application/database";
 
 /**
  * Creates a new user.
@@ -15,12 +16,10 @@ import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
  */
 
 class UserService {
-  private prismaClient: PrismaClient;
   private s3Client: S3Client;
   private fileUploadService: FileUploadService;
 
   constructor() {
-    this.prismaClient = new PrismaClient();
     this.s3Client = new S3Client();
     this.fileUploadService = new FileUploadService();
   }
@@ -34,7 +33,7 @@ class UserService {
         throw new ResponseError(400, "Bad Request");
       }
 
-      return await this.prismaClient.user.create({
+      return await prismaClient.user.create({
         data: {
           email,
           name,
@@ -57,7 +56,7 @@ class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      const allUser = await this.prismaClient.user.findMany();
+      const allUser = await prismaClient.user.findMany();
 
       if (allUser.length === 0) {
         throw new ResponseError(404, "No users found");
@@ -72,7 +71,7 @@ class UserService {
 
   async getUserByID(id: string): Promise<{ user: User | null }> {
     try {
-      const user = await this.prismaClient.user.findUnique({
+      const user = await prismaClient.user.findUnique({
         where: { id: Number(id) },
         include: { tweets: true },
       });
@@ -98,7 +97,7 @@ class UserService {
         updateUserSchema,
         newUser,
       );
-      const result = await this.prismaClient.user.update({
+      const result = await prismaClient.user.update({
         where: { id: Number(id) },
         data: {
           bio,
@@ -129,7 +128,7 @@ class UserService {
 
   async deleteUser(id: string): Promise<void> {
     try {
-      const deletedUser = await this.prismaClient.user.update({
+      const deletedUser = await prismaClient.user.update({
         where: { id: Number(id) },
         data: {
           deletedAt: new Date(),
@@ -148,7 +147,7 @@ class UserService {
 
   async searchUserBasedOnUsername(usernameParam: string): Promise<User> {
     try {
-      const userName = await this.prismaClient.user.findMany({
+      const userName = await prismaClient.user.findMany({
         where: {
           username: {
             equals: usernameParam,
@@ -176,7 +175,7 @@ class UserService {
   async uploadAvatar(id: string, signedUrl: string): Promise<User> {
     try {
       const userId = Number(id);
-      return await this.prismaClient.user.update({
+      return await prismaClient.user.update({
         where: {
           id: userId,
         },
@@ -193,7 +192,7 @@ class UserService {
 
   async deleteAvatar(id: string): Promise<void> {
     try {
-      const avatarUnique = await this.prismaClient.user.findUnique({
+      const avatarUnique = await prismaClient.user.findUnique({
         where: {
           id: Number(id),
         },
@@ -214,7 +213,7 @@ class UserService {
 
       await this.s3Client.send(new DeleteObjectCommand(deleteParam));
 
-      await this.prismaClient.user.update({
+      await prismaClient.user.update({
         where: {
           id: Number(id),
         },
